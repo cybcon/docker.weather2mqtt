@@ -24,11 +24,6 @@ from lib.weather_codes import translate_weather_code
 ###############################################################################
 """
 
-print(translate_weather_code(3))
-
-
-
-
 
 
 
@@ -44,3 +39,6 @@ if __name__ == "__main__":
     """
     Start the script
     """
+    # Test
+    print(translate_weather_code(3))
+    # load the configuration file, based on the environment variable "MODE"
