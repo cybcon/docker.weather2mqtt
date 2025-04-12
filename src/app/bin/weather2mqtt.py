@@ -16,7 +16,7 @@
 """
 import datetime
 import json
-#from lib.weather_codes import translate_weather_code
+from lib.weather_codes import translate_weather_code
 import logging
 #import openmeteo_requests
 import os
@@ -60,6 +60,30 @@ def initialize_logger(severity: int = logging.INFO) -> logging.getLogger:
     log.addHandler(log_handler)
 
     return log
+
+def load_config_file() -> dict:
+    """
+    Load the configuration file and return the configuration as a dictionary.\n
+    :return dict: The loaded configuration.\n
+    :raise ValueError: If the configuration file is not valid.\n
+    :raise TypeError: If the configuration file is not a string.\n
+    :raise Exception: If the configuration file cannot be loaded.\n
+    """
+    if os.environ.get("MODE") is not None:
+        config_file = os.path.join(__config_path__, os.environ.get("MODE") + ".json")
+        if os.path.isfile(config_file):
+            log.debug("Load configuration from file: {}".format(config_file))
+            with open(config_file, "r") as f:
+                config = json.load(f)
+        else:
+            raise ValueError(f"Configuration file {config_file} not found.")
+    else:
+        log.error("No configuration file specified. Please set the MODE environment variable.")
+        sys.exit(1)
+    log.debug("Configuration loaded")
+    
+    return config
+
 
 def initialize_mqtt_client() -> mqtt.Client:
     """
@@ -130,27 +154,10 @@ if __name__ == "__main__":
         __local_tz__ = pytz.timezone(os.environ.get("TZ"))
     log.debug(f"Local timezone set to {__local_tz__}")
 
-    # initialize MQTT client and connect to broker
-    client = initialize_mqtt_client()
-    log.debug("MQTT client initialized")
+    # load configuration from file
+    config = load_config_file()
 
-
-
-    # Read environment variables
-    """
-    MODE="current" \
-    LONGITUDE="48.72592" \
-    LATITUDE="9.11446" \
-    """
-    log.debug("Connecting to MQTT server {}:{}".format(os.environ.get("MQTT_SERVER"), os.environ.get("MQTT_PORT")))
-    try:
-        client.connect(os.environ.get("MQTT_SERVER"), int(os.environ.get("MQTT_PORT")), 60)
-    except ssl.SSLCertVerificationError as e:
-        log.error("SSL certificate verification error: {}".format(e))
-        sys.exit(1)
-
-
-
+    # TODO: Prepare the Open-Meteo API request
     # TODO: Add the local time as message_timestamp to payload and publish weather data
     PAYLOAD = {
         "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),
@@ -159,7 +166,8 @@ if __name__ == "__main__":
             "humidity": 50,
             "wind_speed": 5,
             "precipitation": 0,
-            "weather_code": 0
+            "weather_code": 0,
+            "weather_code_text": translate_weather_code(0)
         },
         "location": {
             "latitude": float(os.environ.get("LATITUDE")),
@@ -167,6 +175,16 @@ if __name__ == "__main__":
         }
     }
     log.debug("Payload: {}".format(json.dumps(PAYLOAD)))
+
+    # initialize MQTT client and connect to broker
+    client = initialize_mqtt_client()
+    log.debug("MQTT client initialized")
+    log.debug("Connecting to MQTT server {}:{}".format(os.environ.get("MQTT_SERVER"), os.environ.get("MQTT_PORT")))
+    try:
+        client.connect(os.environ.get("MQTT_SERVER"), int(os.environ.get("MQTT_PORT")), 60)
+    except ssl.SSLCertVerificationError as e:
+        log.error("SSL certificate verification error: {}".format(e))
+        sys.exit(1)
     log.debug("Publishing weather data to MQTT topic: {}".format(os.environ.get("MQTT_TOPIC")))
     client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(PAYLOAD), qos=0, retain=False)
     
