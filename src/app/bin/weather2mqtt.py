@@ -30,6 +30,7 @@ __version__ = "0.1.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
+__open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 
 """
 ###############################################################################
@@ -82,6 +83,20 @@ def load_config_file() -> dict:
         sys.exit(1)
     log.debug("Configuration loaded")
     
+    # Enrich data with environment variables
+    if "data" not in config.keys():
+        config["data"] = dict()
+    if os.environ.get("LATITUDE") is not None:
+        config["data"]["latitude"] = float(os.environ.get("LATITUDE"))
+    if os.environ.get("LONGITUDE") is not None:
+        config["data"]["longitude"] = float(os.environ.get("LONGITUDE"))
+    if os.environ.get("ELEVATION") is not None:
+        config["data"]["elevation"] = float(os.environ.get("ELEVATION"))
+    if os.environ.get("WEATHER_MODELS") is not None:
+        config["data"]["models"] = float(os.environ.get("ELEVATION"))
+    if os.environ.get("TZ") is not None:
+        config["data"]["timezone"] = os.environ.get("TZ")
+
     return config
 
 
@@ -117,10 +132,10 @@ def initialize_mqtt_client() -> mqtt.Client:
         )
 
     # configure TLS
-    if os.environ.get("MQTT_TLS") == "true":
+    if bool(os.environ.get("MQTT_TLS")):
         log.debug("Configure MQTT connection to use TLS encryption.")
 
-        if os.environ.get("MQTT_TLS_INSECURE") == "true":
+        if bool(os.environ.get("MQTT_TLS_INSECURE")):
             log.debug("Configure MQTT connection to use TLS with insecure mode.")
             client.tls_set(ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"), cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
             client.tls_insecure_set(True)
@@ -158,6 +173,9 @@ if __name__ == "__main__":
     config = load_config_file()
 
     # TODO: Prepare the Open-Meteo API request
+    log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {config['data']}")
+    # TODO: Request the Open-Meteo API
+    # TODO: Parse the response and extract the weather data
     # TODO: Add the local time as message_timestamp to payload and publish weather data
     PAYLOAD = {
         "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),
@@ -171,7 +189,8 @@ if __name__ == "__main__":
         },
         "location": {
             "latitude": float(os.environ.get("LATITUDE")),
-            "longitude": float(os.environ.get("LONGITUDE"))
+            "longitude": float(os.environ.get("LONGITUDE")),
+            "elevation": 409.0
         }
     }
     log.debug("Payload: {}".format(json.dumps(PAYLOAD)))
@@ -185,8 +204,12 @@ if __name__ == "__main__":
     except ssl.SSLCertVerificationError as e:
         log.error("SSL certificate verification error: {}".format(e))
         sys.exit(1)
-    log.debug("Publishing weather data to MQTT topic: {}".format(os.environ.get("MQTT_TOPIC")))
-    client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(PAYLOAD), qos=0, retain=False)
+    
+    retain=False
+    if os.environ.get("MQTT_RETAIN") is not None:
+        retain=bool(os.environ.get("MQTT_RETAIN"))
+    log.debug("Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain))
+    client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(PAYLOAD), qos=0, retain=retain)
     
     
 

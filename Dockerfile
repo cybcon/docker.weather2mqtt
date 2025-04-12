@@ -14,7 +14,8 @@ ENV TZ="UTC" \
     MQTT_TLS="false" \
     MQTT_TLS_INSECURE="false" \
     MQTT_PROTOCOL_VERSION="5" \
-    MQTT_TOPIC="github.com/cybcon/docker.weather2mqtt.git/weather"
+    MQTT_TOPIC="github.com/cybcon/docker.weather2mqtt.git/weather" \
+    MQTT_RETAIN="false"
 
 COPY --chown=root:root /src /
 

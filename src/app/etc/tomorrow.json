@@ -1,3 +1,22 @@
 {
-    
+    "data": {
+        "cell_selection": "land",
+        "forecast_days": 3,
+        "past_days": 0,
+        "daily": [
+            "temperature_2m_min",
+            "temperature_2m_max",
+            "rain_sum",
+            "showers_sum",
+            "snowfall_sum",
+            "weather_code",
+            "wind_speed_10m_max",
+            "wind_direction_10m_dominant",
+            "wind_gusts_10m_max",
+            "sunrise",
+            "sunset",
+            "daylight_duration",
+            "sunshine_duration"
+        ]
+    }
 }
