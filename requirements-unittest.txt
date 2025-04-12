@@ -5,3 +5,4 @@ pytz>=2024.2
 requests>=2.32.3
 requests_cache>=1.2.1
 retry_requests>=2.0.0
+unittest
