@@ -24,7 +24,7 @@ RUN apk upgrade --available --no-cache --update \
        python3=3.12.10-r0 \
        py3-pip=24.3.1-r0 \
        ca-certificates=20241121-r1 \
-       tzdata=2025a-r0 \
+       tzdata=2025b-r0 \
     && pip3 install --no-cache-dir -r /requirements.txt --break-system-packages \
     # Set Timezone
     && cp /usr/share/zoneinfo/${TZ} /etc/localtime \
