@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf\n
 # Date: 2025-04-11\n
 # Last modified by: Michael Oberdorf\n
-# Last modified at: 2025-04-12\n
+# Last modified at: 2025-04-13\n
 ###############################################################################\n
 """
 import datetime
@@ -26,7 +26,7 @@ import pytz
 import ssl
 import sys
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -38,11 +38,11 @@ __open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 ###############################################################################
 """
 
-def initialize_logger(severity: int = logging.INFO) -> logging.getLogger:
+def initialize_logger(severity: int = logging.INFO) -> logging.RootLogger:
     """
     Initialize the logger with the given severity level.\n
     :param severity int: The optional severity level for the logger. (default: 20 (INFO))\n
-    :return logging.getLogger: The initialized logger.\n
+    :return logging.RootLogger: The initialized logger.\n
     :raise ValueError: If the severity level is not valid.\n
     :raise TypeError: If the severity level is not an integer.\n
     :raise Exception: If the logger cannot be initialized.\n
@@ -79,8 +79,7 @@ def load_config_file() -> dict:
         else:
             raise ValueError(f"Configuration file {config_file} not found.")
     else:
-        log.error("No configuration file specified. Please set the MODE environment variable.")
-        sys.exit(1)
+        raise ValueError("No configuration file specified. Please set the MODE environment variable.")
     log.debug("Configuration loaded")
     
     # Enrich data with environment variables
@@ -93,7 +92,7 @@ def load_config_file() -> dict:
     if os.environ.get("ELEVATION") is not None:
         config["data"]["elevation"] = float(os.environ.get("ELEVATION"))
     if os.environ.get("WEATHER_MODELS") is not None:
-        config["data"]["models"] = float(os.environ.get("ELEVATION"))
+        config["data"]["models"] = os.environ.get("WEATHER_MODELS")
     if os.environ.get("TZ") is not None:
         config["data"]["timezone"] = os.environ.get("TZ")
 
@@ -104,8 +103,6 @@ def initialize_mqtt_client() -> mqtt.Client:
     """
     Initialize the MQTT client with the given configuration from environment.\n
     :return mqtt.Client: The initialized MQTT client.\n
-    :raise ValueError: If the MQTT client cannot be initialized.\n
-    :raise TypeError: If the MQTT client is not of type mqtt.Client.\n
     :raise Exception: If the MQTT client cannot be initialized.\n
     """
     if os.environ.get("MQTT_CLIENT_ID") is not None:
