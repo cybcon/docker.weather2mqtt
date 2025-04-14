@@ -18,11 +18,13 @@ import datetime
 import json
 from lib.weather_codes import translate_weather_code
 import logging
+# import numpy
 #import openmeteo_requests
 import os
 import paho.mqtt.client as mqtt
 import pytz
-#import requests_cache
+# from retry_requests import retry # seeAlso: https://pypi.org/project/retry-requests/
+# import requests_cache # seeAlso: https://pypi.org/project/requests-cache/
 import ssl
 import sys
 
