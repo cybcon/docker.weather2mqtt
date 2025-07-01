@@ -18,7 +18,9 @@ __version__ = ".".join(__version_info__)
 __all__ = ["TestWeatherCodes"]
 
 import unittest
+
 from src.app.bin.lib.weather_codes import translate_weather_code
+
 
 class TestWeatherCodes(unittest.TestCase):
     def test_translate_weather_code(self):
@@ -27,6 +29,7 @@ class TestWeatherCodes(unittest.TestCase):
         self.assertEqual(translate_weather_code(1), "Mainly clear")
         self.assertEqual(translate_weather_code(3), "Cloudy")
         self.assertEqual(translate_weather_code(199), "Unknown weather code")
+
 
 if __name__ == "__main__":
     unittest.main()

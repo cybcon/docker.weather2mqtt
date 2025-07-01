@@ -18,10 +18,17 @@ __version__ = ".".join(__version_info__)
 __all__ = ["TestWeather2Mqtt"]
 
 import logging
-import paho.mqtt.client as mqtt
 import os
 import unittest
-from src.app.bin.weather2mqtt import initialize_logger, load_config_file, initialize_mqtt_client
+
+import paho.mqtt.client as mqtt
+
+from src.app.bin.weather2mqtt import (
+    initialize_logger,
+    initialize_mqtt_client,
+    load_config_file,
+)
+
 
 class TestWeather2Mqtt(unittest.TestCase):
     def test_initialize_logger(self):
@@ -45,19 +52,19 @@ class TestWeather2Mqtt(unittest.TestCase):
         self.assertIn("latitude", config["data"])
         self.assertIsInstance(config["data"]["latitude"], float)
         self.assertEqual(config["data"]["latitude"], 1.0)
-        
+
         self.assertIn("longitude", config["data"])
         self.assertIsInstance(config["data"]["longitude"], float)
         self.assertEqual(config["data"]["longitude"], 2.0)
-        
+
         self.assertIn("elevation", config["data"])
         self.assertIsInstance(config["data"]["elevation"], float)
         self.assertEqual(config["data"]["elevation"], 3.0)
-        
+
         self.assertIn("models", config["data"])
         self.assertIsInstance(config["data"]["models"], str)
         self.assertEqual(config["data"]["models"], "FooBar")
-        
+
         self.assertIn("timezone", config["data"])
         self.assertIsInstance(config["data"]["timezone"], str)
         self.assertEqual(config["data"]["timezone"], "UTC")
@@ -70,6 +77,7 @@ class TestWeather2Mqtt(unittest.TestCase):
         self.assertIsNone(mqtt_client._password)
         self.assertEqual(mqtt_client._host, "")
         self.assertEqual(mqtt_client._port, 1883)
+
 
 if __name__ == "__main__":
     unittest.main()

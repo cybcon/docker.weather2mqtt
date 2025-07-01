@@ -109,4 +109,3 @@ SOFTWARE.
 [github-releasedate-shield]: https://img.shields.io/github/release-date/cybcon/docker.weather2mqtt?labelColor=black&style=flat-square
 [github-stars-link]: https://github.com/cybcon/docker.weather2mqtt
 [github-stars-shield]: https://img.shields.io/github/stars/cybcon/docker.weather2mqtt?color=ffcb47&labelColor=black&style=flat-square
-                                                                                                                                                                                                                

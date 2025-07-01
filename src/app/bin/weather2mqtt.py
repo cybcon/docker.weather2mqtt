@@ -14,19 +14,23 @@
 # Last modified at: 2025-04-13\n
 ###############################################################################\n
 """
+
 import datetime
 import json
-from lib.weather_codes import translate_weather_code
 import logging
+
 # import numpy
-#import openmeteo_requests
+# import openmeteo_requests
 import os
-import paho.mqtt.client as mqtt
-import pytz
+
 # from retry_requests import retry # seeAlso: https://pypi.org/project/retry-requests/
 # import requests_cache # seeAlso: https://pypi.org/project/requests-cache/
 import ssl
 import sys
+
+import paho.mqtt.client as mqtt
+import pytz
+from lib.weather_codes import translate_weather_code
 
 __version__ = "1.0.0"
 __script_path__ = os.path.dirname(__file__)
@@ -39,6 +43,7 @@ __open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 # F U N C T I O N S
 ###############################################################################
 """
+
 
 def initialize_logger(severity: int = logging.INFO) -> logging.RootLogger:
     """
@@ -64,6 +69,7 @@ def initialize_logger(severity: int = logging.INFO) -> logging.RootLogger:
 
     return log
 
+
 def load_config_file() -> dict:
     """
     Load the configuration file and return the configuration as a dictionary.\n
@@ -83,7 +89,7 @@ def load_config_file() -> dict:
     else:
         raise ValueError("No configuration file specified. Please set the MODE environment variable.")
     log.debug("Configuration loaded")
-    
+
     # Enrich data with environment variables
     if "data" not in config.keys():
         config["data"] = dict()
@@ -113,16 +119,16 @@ def initialize_mqtt_client() -> mqtt.Client:
     if os.environ.get("MQTT_PROTOCOL_VERSION") == "5":
         log.debug("MQTT protocol version 5")
         client = mqtt.Client(
-            callback_api_version = mqtt.CallbackAPIVersion.VERSION2,
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
             client_id=os.environ.get("MQTT_CLIENT_ID"),
             userdata=None,
             transport="tcp",
-            protocol=mqtt.MQTTv5
+            protocol=mqtt.MQTTv5,
         )
     else:
         log.debug("MQTT protocol version 3.1.1")
         client = mqtt.Client(
-            callback_api_version = mqtt.CallbackAPIVersion.VERSION2,
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
             client_id=os.environ.get("MQTT_CLIENT_ID"),
             clean_session=True,
             userdata=None,
@@ -136,11 +142,21 @@ def initialize_mqtt_client() -> mqtt.Client:
 
         if bool(os.environ.get("MQTT_TLS_INSECURE")):
             log.debug("Configure MQTT connection to use TLS with insecure mode.")
-            client.tls_set(ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"), cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            client.tls_set(
+                ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"),
+                cert_reqs=ssl.CERT_NONE,
+                tls_version=ssl.PROTOCOL_TLS,
+                ciphers=None,
+            )
             client.tls_insecure_set(True)
         else:
             log.debug("Configure MQTT connection to use TLS with secure mode.")
-            client.tls_set(ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"), cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS, ciphers=None)
+            client.tls_set(
+                ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"),
+                cert_reqs=ssl.CERT_REQUIRED,
+                tls_version=ssl.PROTOCOL_TLS,
+                ciphers=None,
+            )
             client.tls_insecure_set(False)
 
     # configure authentication
@@ -184,13 +200,13 @@ if __name__ == "__main__":
             "wind_speed": 5,
             "precipitation": 0,
             "weather_code": 0,
-            "weather_code_text": translate_weather_code(0)
+            "weather_code_text": translate_weather_code(0),
         },
         "location": {
             "latitude": float(os.environ.get("LATITUDE")),
             "longitude": float(os.environ.get("LONGITUDE")),
-            "elevation": 409.0
-        }
+            "elevation": 409.0,
+        },
     }
     log.debug("Payload: {}".format(json.dumps(PAYLOAD)))
 
@@ -203,19 +219,17 @@ if __name__ == "__main__":
     except ssl.SSLCertVerificationError as e:
         log.error("SSL certificate verification error: {}".format(e))
         sys.exit(1)
-    
-    retain=False
+
+    retain = False
     if os.environ.get("MQTT_RETAIN") is not None:
-        retain=bool(os.environ.get("MQTT_RETAIN"))
-    log.debug("Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain))
+        retain = bool(os.environ.get("MQTT_RETAIN"))
+    log.debug(
+        "Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain)
+    )
     client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(PAYLOAD), qos=0, retain=retain)
-    
-    
 
     client.disconnect()
     log.debug("Disconnected from MQTT server")
 
     log.info(f"Stop weather2mqtt version {__version__}")
     sys.exit(0)
-
-

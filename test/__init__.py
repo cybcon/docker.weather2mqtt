@@ -1,8 +1,10 @@
 """
 Test initialization
 """
+
 import os
 import sys
+
 __script_path__ = os.path.dirname(__file__)
 __repo_path__ = os.path.dirname(__script_path__)
 __tool_path__ = os.path.join(__repo_path__, "src", "app", "bin")
