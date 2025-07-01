@@ -54,6 +54,26 @@ The container grab some configuration via environment variables.
 | `MQTT_TOPIC`                 | The MQTT topic to publish the weather data.                                      | optional     | `com/github/cybcon/docker.weather2mqtt.git/weather` |
 | `DEBUG`                      | Enable debug output log.                                                         | optional     | `false`       |
 
+### .envrc example
+
+```bash
+export TZ="Europe/Berlin"
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export DEBUG="true"
+export MODE="current"
+export LATITUDE="48.7801"
+export LONGITUDE="8.9321"
+export ELEVATION="409.0"
+export WEATHER_MODELS="icon_d2"
+export MQTT_SERVER="test.mosquitto.org"
+export MQTT_PORT="8883"
+export MQTT_TLS="true"
+export MQTT_TLS_INSECURE="true"
+export MQTT_CLIENT_ID="acd2b765-e289-49c1-9884-28826f619d2b"
+export MQTT_PROTOCOL_VERSION="5"
+export MQTT_TOPIC="github.com/cybcon/docker.weather2mqtt.git/weather"
+```
+
 
 
 # Donate
