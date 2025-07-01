@@ -184,12 +184,26 @@ def request_weather_data(payload: dict) -> dict:
     response = responses[0]
 
     result = dict()
+    
+    # Adding the location specific information
+    result['location'] = dict()
+    result['location']['latitude'] = response.Latitude()
+    result['location']['longitude'] = response.Longitude()
+    result['location']['elevation'] = response.Elevation()
+
+    # Adding timezone specific information
+    result['timezone'] = dict()
+    result['timezone']['name'] = response.Timezone().decode('utf8')
+    result['timezone']['abbreviation'] = response.TimezoneAbbreviation().decode('utf8')
+    result['timezone']['utc_offset_seconds'] = response.UtcOffsetSeconds()
+
+
     if 'current' in payload.keys():
         result['current'] = parse_current_weather(data=response.Current(), fields=payload['current'])
     if 'daily' in payload.keys():
         result['daily'] = parse_daily_weather(data=response.Daily(), fields=payload['daily'])
 
-    log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result, indent=2)}")
+    log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result)}")
     return result
 
 def parse_current_weather(data: any, fields: list = []) -> dict:
@@ -206,7 +220,7 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
     log.debug("Parsing current weather data from Open-Meteo API response.")
     parsed_data = dict()
 
-    parsed_data['Time'] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).strftime("%Y-%m-%d %H:%M")
+    parsed_data['Time'] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
 
     for i in range(0, len(fields)):
         parsed_data[fields[i]] = data.Variables(i).Value()
@@ -258,8 +272,14 @@ if __name__ == "__main__":
     # request weather data from Open-Meteo API
     weather_result = request_weather_data(payload = config["data"])
 
+    # TODO: transform/enhance weather result
 
-    # TODO: Add the local time as message_timestamp to payload and publish weather data
+
+
+    # Add the local time as message_timestamp to payload
+    weather_result["message_timestamp"] = __local_tz__.localize(datetime.datetime.now()).isoformat()
+    
+    """
     PAYLOAD = {
         "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),
         "weather": {
@@ -276,7 +296,8 @@ if __name__ == "__main__":
             "elevation": 409.0,
         },
     }
-    log.debug("Payload: {}".format(json.dumps(PAYLOAD)))
+    """
+    log.debug("Payload: {}".format(json.dumps(weather_result)))
 
     # initialize MQTT client and connect to broker
     client = initialize_mqtt_client()
@@ -294,7 +315,7 @@ if __name__ == "__main__":
     log.debug(
         "Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain)
     )
-    client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(PAYLOAD), qos=0, retain=retain)
+    client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(weather_result), qos=0, retain=retain)
 
     client.disconnect()
     log.debug("Disconnected from MQTT server")
