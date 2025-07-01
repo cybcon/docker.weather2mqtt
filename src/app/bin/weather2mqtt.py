@@ -20,11 +20,11 @@ import json
 import logging
 
 # import numpy
-# import openmeteo_requests
+import openmeteo_requests
 import os
 
-# from retry_requests import retry # seeAlso: https://pypi.org/project/retry-requests/
-# import requests_cache # seeAlso: https://pypi.org/project/requests-cache/
+from retry_requests import retry # seeAlso: https://pypi.org/project/retry-requests/
+import requests_cache # seeAlso: https://pypi.org/project/requests-cache/
 import ssl
 import sys
 
@@ -167,6 +167,74 @@ def initialize_mqtt_client() -> mqtt.Client:
     return client
 
 
+def request_weather_data(payload: dict) -> dict:
+    """
+    Request weather data from the Open-Meteo API with the given configuration.\n
+    :param payload dict: The configuration for the Open-Meteo API request.\n
+    :return dict: The weather data from the Open-Meteo API.\n
+    :raise Exception: If the weather data cannot be requested.\n
+    """
+    log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {payload}")
+
+    # Setup the Open-Meteo API client with cache and retry on error
+    cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
+    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+    openmeteo = openmeteo_requests.Client(session=retry_session)
+    responses = openmeteo.weather_api(__open_meteo_api_url__, params=payload)
+    response = responses[0]
+
+    result = dict()
+    if 'current' in payload.keys():
+        result['current'] = parse_current_weather(data=response.Current(), fields=payload['current'])
+    if 'daily' in payload.keys():
+        result['daily'] = parse_daily_weather(data=response.Daily(), fields=payload['daily'])
+
+    log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result, indent=2)}")
+    return result
+
+def parse_current_weather(data: any, fields: list = []) -> dict:
+    """
+    Parse the current weather data from the Open-Meteo API response.\n
+    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.\n
+    :param fields list: The list of fields to parse from the current weather data. (default: [])\n
+    :return dict: The parsed current weather data.\n
+    :raise Exception: If the current weather data cannot be parsed.\n
+    """
+    if not data:
+        raise Exception("No current weather data found in the response.")
+
+    log.debug("Parsing current weather data from Open-Meteo API response.")
+    parsed_data = dict()
+
+    parsed_data['Time'] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).strftime("%Y-%m-%d %H:%M")
+
+    for i in range(0, len(fields)):
+        parsed_data[fields[i]] = data.Variables(i).Value()
+        log.debug(f"{fields[i]}: {parsed_data[fields[i]]}")
+
+    # Translate weather code
+    if 'weather_code' in parsed_data.keys():
+        parsed_data['weather_code_text'] = translate_weather_code(parsed_data['weather_code'])
+        log.debug(f"Translated weather code: {parsed_data['weather_code_text']}")
+
+
+    log.debug(f"Parsed current weather: {parsed_data}")
+    return parsed_data
+
+def parse_daily_weather(data: any, fields: list = []) -> dict:
+    """
+    Parse the daily weather data from the Open-Meteo API response.\n
+    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.\n
+    :param fields list: The list of fields to parse from the current weather data. (default: [])\n
+    :return dict: The parsed current weather data.\n
+    :raise Exception: If the current weather data cannot be parsed.\n
+    """
+    if not data:
+        raise Exception("No current weather data found in the response.")
+    
+    log.error("Daily parser not implemented yet")
+    return dict()
+
 """
 ###############################################################################
 # M A I N
@@ -187,10 +255,10 @@ if __name__ == "__main__":
     # load configuration from file
     config = load_config_file()
 
-    # TODO: Prepare the Open-Meteo API request
-    log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {config['data']}")
-    # TODO: Request the Open-Meteo API
-    # TODO: Parse the response and extract the weather data
+    # request weather data from Open-Meteo API
+    weather_result = request_weather_data(payload = config["data"])
+
+
     # TODO: Add the local time as message_timestamp to payload and publish weather data
     PAYLOAD = {
         "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),
