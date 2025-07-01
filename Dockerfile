@@ -1,4 +1,4 @@
-FROM alpine:3.21.3
+FROM alpine:3.22.0
 
 LABEL maintainer="Michael Oberdorf <info@oberdorf-itc.de>"
 LABEL site.local.program.version="1.0.0"
@@ -21,9 +21,9 @@ COPY --chown=root:root /src /
 
 RUN apk upgrade --available --no-cache --update \
     && apk add --no-cache --update \
-       python3=3.12.10-r0 \
-       py3-pip=24.3.1-r0 \
-       ca-certificates=20241121-r1 \
+       python3=3.12.11-r0 \
+       py3-pip=25.1.1-r0 \
+       ca-certificates=20241121-r2 \
        tzdata=2025b-r0 \
     && pip3 install --no-cache-dir -r /requirements.txt --break-system-packages \
     # Set Timezone
