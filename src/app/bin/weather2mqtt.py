@@ -18,19 +18,17 @@
 import datetime
 import json
 import logging
-
-# import numpy
-import openmeteo_requests
 import os
-
-from retry_requests import retry # seeAlso: https://pypi.org/project/retry-requests/
-import requests_cache # seeAlso: https://pypi.org/project/requests-cache/
 import ssl
 import sys
 
+# import numpy
+import openmeteo_requests
 import paho.mqtt.client as mqtt
 import pytz
+import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
+from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
 __version__ = "1.0.0"
 __script_path__ = os.path.dirname(__file__)
@@ -184,27 +182,27 @@ def request_weather_data(payload: dict) -> dict:
     response = responses[0]
 
     result = dict()
-    
+
     # Adding the location specific information
-    result['location'] = dict()
-    result['location']['latitude'] = response.Latitude()
-    result['location']['longitude'] = response.Longitude()
-    result['location']['elevation'] = response.Elevation()
+    result["location"] = dict()
+    result["location"]["latitude"] = response.Latitude()
+    result["location"]["longitude"] = response.Longitude()
+    result["location"]["elevation"] = response.Elevation()
 
     # Adding timezone specific information
-    result['timezone'] = dict()
-    result['timezone']['name'] = response.Timezone().decode('utf8')
-    result['timezone']['abbreviation'] = response.TimezoneAbbreviation().decode('utf8')
-    result['timezone']['utc_offset_seconds'] = response.UtcOffsetSeconds()
+    result["timezone"] = dict()
+    result["timezone"]["name"] = response.Timezone().decode("utf8")
+    result["timezone"]["abbreviation"] = response.TimezoneAbbreviation().decode("utf8")
+    result["timezone"]["utc_offset_seconds"] = response.UtcOffsetSeconds()
 
-
-    if 'current' in payload.keys():
-        result['current'] = parse_current_weather(data=response.Current(), fields=payload['current'])
-    if 'daily' in payload.keys():
-        result['daily'] = parse_daily_weather(data=response.Daily(), fields=payload['daily'])
+    if "current" in payload.keys():
+        result["current"] = parse_current_weather(data=response.Current(), fields=payload["current"])
+    if "daily" in payload.keys():
+        result["daily"] = parse_daily_weather(data=response.Daily(), fields=payload["daily"])
 
     log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result)}")
     return result
+
 
 def parse_current_weather(data: any, fields: list = []) -> dict:
     """
@@ -220,20 +218,20 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
     log.debug("Parsing current weather data from Open-Meteo API response.")
     parsed_data = dict()
 
-    parsed_data['Time'] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
+    parsed_data["Time"] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
 
     for i in range(0, len(fields)):
         parsed_data[fields[i]] = data.Variables(i).Value()
         log.debug(f"{fields[i]}: {parsed_data[fields[i]]}")
 
     # Translate weather code
-    if 'weather_code' in parsed_data.keys():
-        parsed_data['weather_code_text'] = translate_weather_code(parsed_data['weather_code'])
+    if "weather_code" in parsed_data.keys():
+        parsed_data["weather_code_text"] = translate_weather_code(parsed_data["weather_code"])
         log.debug(f"Translated weather code: {parsed_data['weather_code_text']}")
-
 
     log.debug(f"Parsed current weather: {parsed_data}")
     return parsed_data
+
 
 def parse_daily_weather(data: any, fields: list = []) -> dict:
     """
@@ -245,9 +243,10 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
     """
     if not data:
         raise Exception("No current weather data found in the response.")
-    
+
     log.error("Daily parser not implemented yet")
     return dict()
+
 
 """
 ###############################################################################
@@ -270,15 +269,13 @@ if __name__ == "__main__":
     config = load_config_file()
 
     # request weather data from Open-Meteo API
-    weather_result = request_weather_data(payload = config["data"])
+    weather_result = request_weather_data(payload=config["data"])
 
     # TODO: transform/enhance weather result
 
-
-
     # Add the local time as message_timestamp to payload
     weather_result["message_timestamp"] = __local_tz__.localize(datetime.datetime.now()).isoformat()
-    
+
     """
     PAYLOAD = {
         "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),

@@ -53,6 +53,7 @@ _WEATHER_CODES = {
     103: "Hurricane",
 }
 
+
 def translate_weather_code(code: int) -> str:
     """
     Translate weather code to human readable description\n
