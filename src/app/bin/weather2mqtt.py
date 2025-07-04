@@ -43,7 +43,7 @@ __open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 """
 
 
-def initialize_logger(severity: int = logging.INFO) -> logging.RootLogger:
+def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     """
     Initialize the logger with the given severity level.\n
     :param severity int: The optional severity level for the logger. (default: 20 (INFO))\n
