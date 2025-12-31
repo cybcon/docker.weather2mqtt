@@ -24,7 +24,6 @@ import sys
 
 # import numpy
 import openmeteo_requests
-from openmeteo_sdk import Variable
 import paho.mqtt.client as mqtt
 import pytz
 import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
@@ -42,6 +41,7 @@ __open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 # F U N C T I O N S
 ###############################################################################
 """
+
 
 def __makeAbsolutePath(path: str) -> str:
     """
@@ -69,6 +69,7 @@ def __makeAbsolutePath(path: str) -> str:
 
     return path
 
+
 def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     """
     Initialize the logger with the given severity level.\n
@@ -92,6 +93,7 @@ def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     log.addHandler(log_handler)
 
     return log
+
 
 def load_config_file() -> dict:
     """
@@ -128,6 +130,7 @@ def load_config_file() -> dict:
         config["data"]["timezone"] = os.environ.get("TZ")
 
     return config
+
 
 def initialize_mqtt_client() -> mqtt.Client:
     """
@@ -188,6 +191,7 @@ def initialize_mqtt_client() -> mqtt.Client:
 
     return client
 
+
 def request_weather_data(payload: dict) -> dict:
     """
     Request weather data from the Open-Meteo API with the given configuration.\n
@@ -203,7 +207,9 @@ def request_weather_data(payload: dict) -> dict:
         os.makedirs(cache_dir)
     log.debug(f"Using cache directory: {cache_dir}")
     # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession(f'{cache_dir}/.cache', expire_after=int(os.environ.get("CACHE_EXPIRY_AFTER_SEC", "600")))
+    cache_session = requests_cache.CachedSession(
+        f"{cache_dir}/.cache", expire_after=int(os.environ.get("CACHE_EXPIRY_AFTER_SEC", "600"))
+    )
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
     openmeteo = openmeteo_requests.Client(session=retry_session)
     responses = openmeteo.weather_api(__open_meteo_api_url__, params=payload)
@@ -230,6 +236,7 @@ def request_weather_data(payload: dict) -> dict:
 
     log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result)}")
     return result
+
 
 def parse_current_weather(data: any, fields: list = []) -> dict:
     """
@@ -259,6 +266,7 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
     log.debug(f"Parsed current weather: {parsed_data}")
     return parsed_data
 
+
 def parse_daily_weather(data: any, fields: list = []) -> dict:
     """
     Parse the daily weather data from the Open-Meteo API response.\n
@@ -284,7 +292,7 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
         forecast_interval = (forecast_starts_at + i * interval).strftime("%Y-%m-%d")
         interval_range.append(forecast_interval)
 
-    variables_with_time = [ data.Variables(i) for i in range(0, data.VariablesLength() )]
+    variables_with_time = [data.Variables(i) for i in range(0, data.VariablesLength())]
 
     for i in range(0, len(fields)):
         # Not sure do we require to varify the field. Does field order matches?
@@ -296,7 +304,7 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
         # Translate weather code
     if "weather_code" in parsed_data.keys():
         parsed_data["weather_code_text"] = dict()
-        for k,v in parsed_data["weather_code"].items():
+        for k, v in parsed_data["weather_code"].items():
             parsed_data["weather_code_text"][k] = translate_weather_code(v)
 
     log.debug(f"Parsed current weather: {parsed_data}")
