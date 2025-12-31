@@ -3,7 +3,6 @@ on:
   pull_request:
     types:
       - closed
-  workflow_dispatch:
 
 jobs:
   build-and-push-container-image:
@@ -46,7 +45,7 @@ jobs:
           push: true
           context: .
           platforms: linux/amd64, linux/arm64
-          tags: oitc/mqtt2elasticsearch:${{ steps.application-version.outputs.tag }},oitc/mqtt2elasticsearch:latest
+          tags: oitc/weather2mqtt:${{ steps.application-version.outputs.tag }},oitc/weather2mqtt:latest
           labels: |
             site.local.program.version=${{ steps.application-version.outputs.tag }}
             context.github.repositoryUrl=${{ github.repositoryUrl }}
