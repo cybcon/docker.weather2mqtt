@@ -26,7 +26,8 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
+* [`latest`, `1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
+* [`1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
 
 # Summary
 The application will make an [Open Meteo](https://open-meteo.com/) free weather API call to get weather information for the configured geo coordinates.
