@@ -70,7 +70,7 @@ class TestWeather2Mqtt(unittest.TestCase):
     def test_initialize_mqtt_client(self):
         mqtt_client = initialize_mqtt_client()
         self.assertIsInstance(mqtt_client, mqtt.Client)
-        self.assertEqual(mqtt_client._client_id, b"acd2b765-e289-49c1-9884-28826f619d2b")
+        self.assertEqual(mqtt_client._client_id, b"")
         self.assertIsNone(mqtt_client._username)
         self.assertIsNone(mqtt_client._password)
         self.assertEqual(mqtt_client._host, "")
