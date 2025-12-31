@@ -28,7 +28,88 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 * [`latest`, `1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
 
+# Summary
+The application will make an [Open Meteo](https://open-meteo.com/) free weather API call to get weather information for the configured geo coordinates.
+There are currently two `MODES` specified:
+1. `current`: will get the current weather
+2. `tomorrow`: will get the weather for tomorrow
+
+The results will be parsed, formatted in JSON and published via MQTT.
+
+## JSON output examples
+
+### current weather
+
+```json
+{
+  "location": {
+    "latitude": 48.779998779296875,
+    "longitude": 8.940000534057617,
+    "elevation": 409
+  },
+  "timezone": {
+    "name": "Europe/Berlin",
+    "abbreviation": "GMT+1",
+    "utc_offset_seconds": 3600
+  },
+  "tomorrow": {
+    "date": "2026-01-01",
+    "temperature_2m_min": -9.211000442504883,
+    "temperature_2m_max": 2.439000129699707,
+    "rain_sum": 0,
+    "showers_sum": 0,
+    "snowfall_sum": 0,
+    "weather_code": 71,
+    "wind_speed_10m_max": 17.771753311157227,
+    "wind_direction_10m_dominant": 234.57273864746094,
+    "wind_gusts_10m_max": 32.39999771118164,
+    "sunrise": 0,
+    "sunset": 0,
+    "daylight_duration": 30052.92578125,
+    "sunshine_duration": 23301.818359375,
+    "weather_code_text": "Snow fall: Slight intensity"
+  },
+  "message_timestamp": "2025-12-31T14:37:19.159381+01:00"
+}
+```
+
+## weather forecast for tomorrow
+
+```json
+{
+  "location": {
+    "latitude": 48.779998779296875,
+    "longitude": 8.940000534057617,
+    "elevation": 409
+  },
+  "timezone": {
+    "name": "Europe/Berlin",
+    "abbreviation": "GMT+1",
+    "utc_offset_seconds": 3600
+  },
+  "tomorrow": {
+    "date": "2026-01-01",
+    "temperature_2m_min": -9.211000442504883,
+    "temperature_2m_max": 2.439000129699707,
+    "rain_sum": 0,
+    "showers_sum": 0,
+    "snowfall_sum": 0,
+    "weather_code": 71,
+    "wind_speed_10m_max": 17.771753311157227,
+    "wind_direction_10m_dominant": 234.57273864746094,
+    "wind_gusts_10m_max": 32.39999771118164,
+    "sunrise": 0,
+    "sunset": 0,
+    "daylight_duration": 30052.92578125,
+    "sunshine_duration": 23301.818359375,
+    "weather_code_text": "Snow fall: Slight intensity"
+  },
+  "message_timestamp": "2025-12-31T14:37:19.159381+01:00"
+}
+```
+
 # Configuration
+
 ## Container configuration
 
 The container grab some configuration via environment variables.
@@ -52,6 +133,8 @@ The container grab some configuration via environment variables.
 | `MQTT_PORT`                  | MQTT broker TCP port to connect to.                                              | optional     | `1883`        |
 | `MQTT_RETAIN`                | Publish MQTT message in retain mode fpr persistance.                             | optional     | `false`       |
 | `MQTT_TOPIC`                 | The MQTT topic to publish the weather data.                                      | optional     | `com/github/cybcon/docker.weather2mqtt.git/weather` |
+| `CACHE_DIR`                  | Directory used for API request caching.                                          | optional     | `/app/cache`  |
+| `CACHE_EXPIRY_AFTER_SEC`     | Cache expiration time in seconds.                                                | optional     | `600`         |
 | `DEBUG`                      | Enable debug output log.                                                         | optional     | `false`       |
 
 ### .envrc example
@@ -72,8 +155,20 @@ export MQTT_TLS_INSECURE="true"
 export MQTT_CLIENT_ID="acd2b765-e289-49c1-9884-28826f619d2b"
 export MQTT_PROTOCOL_VERSION="5"
 export MQTT_TOPIC="github.com/cybcon/docker.weather2mqtt.git/weather"
+export CACHE_DIR="../cache"
+export CACHE_EXPIRY_AFTER_SEC="600"
 ```
 
+### Configuration files
+
+The modes (`current` and `tomorrow`) are defined in configuration files. That can be found here:
+
+| Mode       | Configuration file in GIT                                    | Location in the container image |
+|------------|--------------------------------------------------------------|---------------------------------|
+| `current`  | [`./src/app/etc/current.json`](./src/app/etc/current.json)   | `/app/etc/current.json`         |
+| `tomorrow` | [`./src/app/etc/tomorrow.json`](./src/app/etc/tomorrow.json) | `/app/etc/tomorrow.json`        |
+
+The files specifies the API call request body for Open Mateo. A documentation of the free weather API can be found here: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs).
 
 
 # Donate
