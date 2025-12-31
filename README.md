@@ -52,24 +52,23 @@ The results will be parsed, formatted in JSON and published via MQTT.
     "abbreviation": "GMT+1",
     "utc_offset_seconds": 3600
   },
-  "tomorrow": {
-    "date": "2026-01-01",
-    "temperature_2m_min": -9.211000442504883,
-    "temperature_2m_max": 2.439000129699707,
-    "rain_sum": 0,
-    "showers_sum": 0,
-    "snowfall_sum": 0,
-    "weather_code": 71,
-    "wind_speed_10m_max": 17.771753311157227,
-    "wind_direction_10m_dominant": 234.57273864746094,
-    "wind_gusts_10m_max": 32.39999771118164,
-    "sunrise": 0,
-    "sunset": 0,
-    "daylight_duration": 30052.92578125,
-    "sunshine_duration": 23301.818359375,
-    "weather_code_text": "Snow fall: Slight intensity"
+  "current": {
+    "time": "2025-12-31T13:45:00+01:00",
+    "temperature_2m": 0.10000000149011612,
+    "relative_humidity_2m": 66,
+    "is_day": 1,
+    "rain": 0,
+    "showers": 0,
+    "snowfall": 0,
+    "weather_code": 1,
+    "cloud_cover": 6,
+    "surface_pressure": 974.9057006835938,
+    "wind_speed_10m": 3.3190360069274902,
+    "wind_direction_10m": 257.47119140625,
+    "wind_gusts_10m": 8.640000343322754,
+    "weather_code_text": "Mainly clear"
   },
-  "message_timestamp": "2025-12-31T14:37:19.159381+01:00"
+  "message_timestamp": "2025-12-31T13:55:18.454689+01:00"
 }
 ```
 
