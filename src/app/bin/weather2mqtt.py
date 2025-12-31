@@ -30,7 +30,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
