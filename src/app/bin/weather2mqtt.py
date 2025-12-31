@@ -24,6 +24,7 @@ import sys
 
 # import numpy
 import openmeteo_requests
+from openmeteo_sdk import Variable
 import paho.mqtt.client as mqtt
 import pytz
 import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
@@ -173,7 +174,6 @@ def request_weather_data(payload: dict) -> dict:
     :raise Exception: If the weather data cannot be requested.\n
     """
     log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {payload}")
-
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
@@ -244,8 +244,37 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
     if not data:
         raise Exception("No current weather data found in the response.")
 
-    log.error("Daily parser not implemented yet")
-    return dict()
+    log.debug("Parsing current weather data from Open-Meteo API response.")
+    parsed_data = dict()
+
+    forecast_starts_at = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__)
+    forecast_ends_at = datetime.datetime.fromtimestamp(data.TimeEnd(), tz=__local_tz__)
+    delta = forecast_ends_at - forecast_starts_at
+    interval = datetime.timedelta(seconds=data.Interval())
+
+    # print("Range from", daily_forecast_starts_at.strftime('%Y-%m-%d'), "to", daily_forecast_ends_at.strftime('%Y-%m-%d'), "with interval", interval.days, "days")
+    interval_range = list()
+    for i in range(delta.days):
+        forecast_interval = (forecast_starts_at + i * interval).strftime("%Y-%m-%d")
+        interval_range.append(forecast_interval)
+
+    variables_with_time = [ data.Variables(i) for i in range(0, data.VariablesLength() )]
+
+    for i in range(0, len(fields)):
+        # Not sure do we require to varify the field. Does field order matches?
+        # And what about sunshine?
+        field = parsed_data[fields[i]] = dict()
+        for j in range(len(interval_range)):
+            field[interval_range[j]] = variables_with_time[i].Values(j)
+
+        # Translate weather code
+    if "weather_code" in parsed_data.keys():
+        parsed_data["weather_code_text"] = dict()
+        for k,v in parsed_data["weather_code"].items():
+            parsed_data["weather_code_text"][k] = translate_weather_code(v)
+
+    log.debug(f"Parsed current weather: {parsed_data}")
+    return parsed_data
 
 
 """
