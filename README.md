@@ -170,6 +170,21 @@ The modes (`current` and `tomorrow`) are defined in configuration files. That ca
 
 The files specifies the API call request body for Open Mateo. A documentation of the free weather API can be found here: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs).
 
+## Python Unit Tests
+
+To trigger the Python unit tests please follow following instrructions after checkout the git repository.
+
+### Requirements
+
+```bash
+pip install -r src/requirements.txt
+```
+
+### Execute Unit Tests
+
+```bash
+python -m unittest
+```
 
 # Donate
 I would appreciate a small donation to support the further development of my open source projects.

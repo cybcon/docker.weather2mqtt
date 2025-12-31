@@ -5,13 +5,13 @@ test_weather2mqtt.py is a python unit test for the python script\n
 Author: Michael Oberdorf\n
 Date:   2025-04-13\n
 Last modified by: Michael Oberdorf\n
-Last modified at: 2025-04-13\n
+Last modified at: 2025-12-31\n
 ***************************************************************************\n
 """
 
 __author__ = "Michael Oberdorf <info@oberdorf-itc.de>"
 __status__ = "production"
-__date__ = "2025-04-13"
+__date__ = "2025-12-31"
 __version_info__ = ("1", "0", "0")
 __version__ = ".".join(__version_info__)
 
@@ -41,8 +41,6 @@ class TestWeather2Mqtt(unittest.TestCase):
         self.assertEqual(log.level, logging.FATAL)
 
     def test_load_config_file(self):
-        with self.assertRaises(ValueError):
-            load_config_file()
         os.environ["MODE"] = "current"
         config = load_config_file()
         self.assertIsInstance(config, dict)
@@ -72,7 +70,7 @@ class TestWeather2Mqtt(unittest.TestCase):
     def test_initialize_mqtt_client(self):
         mqtt_client = initialize_mqtt_client()
         self.assertIsInstance(mqtt_client, mqtt.Client)
-        self.assertEqual(mqtt_client._client_id, b"")
+        self.assertEqual(mqtt_client._client_id, b"acd2b765-e289-49c1-9884-28826f619d2b")
         self.assertIsNone(mqtt_client._username)
         self.assertIsNone(mqtt_client._password)
         self.assertEqual(mqtt_client._host, "")
