@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf\n
 # Date: 2025-04-11\n
 # Last modified by: Michael Oberdorf\n
-# Last modified at: 2025-04-13\n
+# Last modified at: 2025-12-31\n
 ###############################################################################\n
 """
 
@@ -43,6 +43,31 @@ __open_meteo_api_url__ = "https://api.open-meteo.com/v1/forecast"
 ###############################################################################
 """
 
+def __makeAbsolutePath(path: str) -> str:
+    """
+    A function that identifies relative pathes and convcert them to an absolute path
+
+    :param path: filesystem path
+    :type path: str
+    :return: absolute filesystem path
+    :rtype: str
+    """
+    log.debug(f"def makeAbsolutePath(path: str = {path}) -> str:")
+
+    if not os.path.isabs(path):
+        log.debug(f"Releative path found: {path}")
+        path = os.path.join(os.path.dirname(__file__), path)
+        log.debug(f"Absolute path is: {path}")
+    else:
+        log.debug(f"Path is not relative: {path} - skip conversion.")
+
+    # validate if path exists
+    if not os.path.exists(path):
+        log.debug(f"Path not found exception for: {path}")
+    else:
+        log.debug(f"Path exists: {path}")
+
+    return path
 
 def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     """
@@ -67,7 +92,6 @@ def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     log.addHandler(log_handler)
 
     return log
-
 
 def load_config_file() -> dict:
     """
@@ -104,7 +128,6 @@ def load_config_file() -> dict:
         config["data"]["timezone"] = os.environ.get("TZ")
 
     return config
-
 
 def initialize_mqtt_client() -> mqtt.Client:
     """
@@ -165,7 +188,6 @@ def initialize_mqtt_client() -> mqtt.Client:
 
     return client
 
-
 def request_weather_data(payload: dict) -> dict:
     """
     Request weather data from the Open-Meteo API with the given configuration.\n
@@ -174,8 +196,14 @@ def request_weather_data(payload: dict) -> dict:
     :raise Exception: If the weather data cannot be requested.\n
     """
     log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {payload}")
+    # initialize cache directory
+    cache_dir = __makeAbsolutePath(os.environ.get("CACHE_DIR", "/app/cache"))
+    if not os.path.exists(cache_dir):
+        log.debug(f"Cache directory not found, create: {cache_dir}")
+        os.makedirs(cache_dir)
+    log.debug(f"Using cache directory: {cache_dir}")
     # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
+    cache_session = requests_cache.CachedSession(f'{cache_dir}/.cache', expire_after=int(os.environ.get("CACHE_EXPIRY_AFTER_SEC", "600")))
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
     openmeteo = openmeteo_requests.Client(session=retry_session)
     responses = openmeteo.weather_api(__open_meteo_api_url__, params=payload)
@@ -202,7 +230,6 @@ def request_weather_data(payload: dict) -> dict:
 
     log.debug(f"Received weather data from Open-Meteo API: {json.dumps(result)}")
     return result
-
 
 def parse_current_weather(data: any, fields: list = []) -> dict:
     """
@@ -231,7 +258,6 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
 
     log.debug(f"Parsed current weather: {parsed_data}")
     return parsed_data
-
 
 def parse_daily_weather(data: any, fields: list = []) -> dict:
     """
@@ -300,7 +326,20 @@ if __name__ == "__main__":
     # request weather data from Open-Meteo API
     weather_result = request_weather_data(payload=config["data"])
 
-    # TODO: transform/enhance weather result
+    # Special operations if mode is "tomorrow"
+    if os.environ.get("MODE") == "tomorrow":
+        log.debug("Mode is 'tomorrow', extract tomorrow's weather data only.")
+        if "daily" in weather_result.keys():
+            tomorrow_date = (datetime.datetime.now(tz=__local_tz__) + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+            log.debug(f"Extract weather data for date: {tomorrow_date}")
+            tomorrow_data = dict()
+            tomorrow_data["date"] = tomorrow_date
+            for key, value in weather_result["daily"].items():
+                tomorrow_data[key] = weather_result["daily"][key][tomorrow_date]
+            weather_result["tomorrow"] = tomorrow_data
+            del weather_result["daily"]
+        else:
+            log.warning("No daily weather data found to extract tomorrow's weather.")
 
     # Add the local time as message_timestamp to payload
     weather_result["message_timestamp"] = __local_tz__.localize(datetime.datetime.now()).isoformat()
