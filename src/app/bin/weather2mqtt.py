@@ -30,7 +30,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -252,7 +252,7 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
     log.debug("Parsing current weather data from Open-Meteo API response.")
     parsed_data = dict()
 
-    parsed_data["Time"] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
+    parsed_data["time"] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
 
     for i in range(0, len(fields)):
         parsed_data[fields[i]] = data.Variables(i).Value()
