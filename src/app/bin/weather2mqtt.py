@@ -1,18 +1,18 @@
 """
 ###############################################################################
-# Tool to get weather information from the Open-Meteo API and publish it to MQTT\n
-# seeAlso: https://open-meteo.com/en/docs\n
-#------------------------------------------------------------------------------\n
-# This is a Hackergarden project, started during 50th Hackergarden 2025-04-01\n
-# at codecentric AG, Industriestraße 3, 70565 Stuttgart, Germany\n
-# seeAlso: https://www.hackergarten.net/\n
-# seeAlso: https://www.codecentric.de/standorte/stuttgart\n
-#------------------------------------------------------------------------------\n
-# Author: Michael Oberdorf\n
-# Date: 2025-04-11\n
-# Last modified by: Michael Oberdorf\n
-# Last modified at: 2025-12-31\n
-###############################################################################\n
+# Tool to get weather information from the Open-Meteo API and publish it to MQTT
+# seeAlso: https://open-meteo.com/en/docs
+#------------------------------------------------------------------------------
+# This is a Hackergarden project, started during 50th Hackergarden 2025-04-01
+# at codecentric AG, Industriestraße 3, 70565 Stuttgart, Germany
+# seeAlso: https://www.hackergarten.net/
+# seeAlso: https://www.codecentric.de/standorte/stuttgart
+#------------------------------------------------------------------------------
+# Author: Michael Oberdorf
+# Date: 2025-04-11
+# Last modified by: Michael Oberdorf
+# Last modified at: 2026-01-01
+###############################################################################
 """
 
 import datetime
@@ -22,7 +22,6 @@ import os
 import ssl
 import sys
 
-# import numpy
 import openmeteo_requests
 import paho.mqtt.client as mqtt
 import pytz
@@ -30,7 +29,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -72,12 +71,13 @@ def __makeAbsolutePath(path: str) -> str:
 
 def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
     """
-    Initialize the logger with the given severity level.\n
-    :param severity int: The optional severity level for the logger. (default: 20 (INFO))\n
-    :return logging.RootLogger: The initialized logger.\n
-    :raise ValueError: If the severity level is not valid.\n
-    :raise TypeError: If the severity level is not an integer.\n
-    :raise Exception: If the logger cannot be initialized.\n
+    Initialize the logger with the given severity level.
+
+    :param severity int: The optional severity level for the logger. (default: 20 (INFO))
+    :return logging.RootLogger: The initialized logger.
+    :raise ValueError: If the severity level is not valid.
+    :raise TypeError: If the severity level is not an integer.
+    :raise Exception: If the logger cannot be initialized.
     """
     valid_severity = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
     if severity not in valid_severity:
@@ -97,11 +97,12 @@ def initialize_logger(severity: int = logging.INFO) -> logging.Logger:
 
 def load_config_file() -> dict:
     """
-    Load the configuration file and return the configuration as a dictionary.\n
-    :return dict: The loaded configuration.\n
-    :raise ValueError: If the configuration file is not valid.\n
-    :raise TypeError: If the configuration file is not a string.\n
-    :raise Exception: If the configuration file cannot be loaded.\n
+    Load the configuration file and return the configuration as a dictionary.
+
+    :return dict: The loaded configuration.
+    :raise ValueError: If the configuration file is not valid.
+    :raise TypeError: If the configuration file is not a string.
+    :raise Exception: If the configuration file cannot be loaded.
     """
     if os.environ.get("MODE") is not None:
         config_file = os.path.join(__config_path__, os.environ.get("MODE") + ".json")
@@ -134,9 +135,11 @@ def load_config_file() -> dict:
 
 def initialize_mqtt_client() -> mqtt.Client:
     """
-    Initialize the MQTT client with the given configuration from environment.\n
-    :return mqtt.Client: The initialized MQTT client.\n
-    :raise Exception: If the MQTT client cannot be initialized.\n
+    Initialize the MQTT client with the given configuration from environment.
+
+    :return mqtt.Client: The initialized MQTT client.
+    :raise ValueError: If the MQTT client configuration is not valid.
+    :raise Exception: If the MQTT client cannot be initialized.
     """
     if os.environ.get("MQTT_CLIENT_ID") is not None:
         log.debug("Use MQTT client ID: {}".format(os.environ.get("MQTT_CLIENT_ID")))
@@ -185,19 +188,28 @@ def initialize_mqtt_client() -> mqtt.Client:
             client.tls_insecure_set(False)
 
     # configure authentication
-    if os.environ.get("MQTT_USERNAME") is not None and os.environ.get("MQTT_PASSWORD") is not None:
+    mqtt_pass = None
+    if os.environ.get("MQTT_PASSWORD") is not None:
+        mqtt_pass = os.environ.get("MQTT_PASSWORD")
+    if os.environ.get("MQTT_PASSWORD_FILE") is not None:
+        if not os.path.isfile(os.environ.get("MQTT_PASSWORD_FILE")):
+            raise ValueError("MQTT password file {} not found.".format(os.environ.get("MQTT_PASSWORD_FILE")))
+        with open(os.environ.get("MQTT_PASSWORD_FILE"), "r") as f:
+            mqtt_pass = f.read().strip()
+    if os.environ.get("MQTT_USERNAME") is not None and mqtt_pass is not None:
         log.debug("Set username ({}) and password for MQTT connection".format(os.environ.get("MQTT_USERNAME")))
-        client.username_pw_set(os.environ.get("MQTT_USERNAME"), os.environ.get("MQTT_PASSWORD"))
+        client.username_pw_set(os.environ.get("MQTT_USERNAME"), mqtt_pass)
 
     return client
 
 
 def request_weather_data(payload: dict) -> dict:
     """
-    Request weather data from the Open-Meteo API with the given configuration.\n
-    :param payload dict: The configuration for the Open-Meteo API request.\n
-    :return dict: The weather data from the Open-Meteo API.\n
-    :raise Exception: If the weather data cannot be requested.\n
+    Request weather data from the Open-Meteo API with the given configuration.
+
+    :param payload dict: The configuration for the Open-Meteo API request.
+    :return dict: The weather data from the Open-Meteo API.
+    :raise Exception: If the weather data cannot be requested.
     """
     log.debug(f"Request Open-Meteo API {__open_meteo_api_url__} with parameters: {payload}")
     # initialize cache directory
@@ -240,11 +252,12 @@ def request_weather_data(payload: dict) -> dict:
 
 def parse_current_weather(data: any, fields: list = []) -> dict:
     """
-    Parse the current weather data from the Open-Meteo API response.\n
-    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.\n
-    :param fields list: The list of fields to parse from the current weather data. (default: [])\n
-    :return dict: The parsed current weather data.\n
-    :raise Exception: If the current weather data cannot be parsed.\n
+    Parse the current weather data from the Open-Meteo API response.
+
+    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.
+    :param fields list: The list of fields to parse from the current weather data. (default: [])
+    :return dict: The parsed current weather data.
+    :raise Exception: If the current weather data cannot be parsed.
     """
     if not data:
         raise Exception("No current weather data found in the response.")
@@ -269,11 +282,12 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
 
 def parse_daily_weather(data: any, fields: list = []) -> dict:
     """
-    Parse the daily weather data from the Open-Meteo API response.\n
-    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.\n
-    :param fields list: The list of fields to parse from the current weather data. (default: [])\n
-    :return dict: The parsed current weather data.\n
-    :raise Exception: If the current weather data cannot be parsed.\n
+    Parse the daily weather data from the Open-Meteo API response.
+
+    :param data openmeteo_requests.VariablesWithTime: The Open-Meteo API response from current weather.
+    :param fields list: The list of fields to parse from the current weather data. (default: [])
+    :return dict: The parsed current weather data.
+    :raise Exception: If the current weather data cannot be parsed.
     """
     if not data:
         raise Exception("No current weather data found in the response.")
@@ -352,24 +366,6 @@ if __name__ == "__main__":
     # Add the local time as message_timestamp to payload
     weather_result["message_timestamp"] = __local_tz__.localize(datetime.datetime.now()).isoformat()
 
-    """
-    PAYLOAD = {
-        "message_timestamp": __local_tz__.localize(datetime.datetime.now()).isoformat(),
-        "weather": {
-            "temperature": 20,
-            "humidity": 50,
-            "wind_speed": 5,
-            "precipitation": 0,
-            "weather_code": 0,
-            "weather_code_text": translate_weather_code(0),
-        },
-        "location": {
-            "latitude": float(os.environ.get("LATITUDE")),
-            "longitude": float(os.environ.get("LONGITUDE")),
-            "elevation": 409.0,
-        },
-    }
-    """
     log.debug("Payload: {}".format(json.dumps(weather_result)))
 
     # initialize MQTT client and connect to broker
