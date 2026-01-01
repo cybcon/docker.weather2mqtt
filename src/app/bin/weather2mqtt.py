@@ -29,7 +29,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -165,10 +165,10 @@ def initialize_mqtt_client() -> mqtt.Client:
         )
 
     # configure TLS
-    if bool(os.environ.get("MQTT_TLS")):
+    if os.environ.get("MQTT_TLS", "false").lower() == "true":
         log.debug("Configure MQTT connection to use TLS encryption.")
 
-        if bool(os.environ.get("MQTT_TLS_INSECURE")):
+        if os.environ.get("MQTT_TLS_INSECURE", "false").lower() == "true":
             log.debug("Configure MQTT connection to use TLS with insecure mode.")
             client.tls_set(
                 ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"),
@@ -315,7 +315,7 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
         for j in range(len(interval_range)):
             field[interval_range[j]] = variables_with_time[i].Values(j)
 
-        # Translate weather code
+    # Translate weather code
     if "weather_code" in parsed_data.keys():
         parsed_data["weather_code_text"] = dict()
         for k, v in parsed_data["weather_code"].items():
@@ -331,7 +331,7 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
 ###############################################################################
 """
 # initialize logger
-if os.getenv("DEBUG") == "true":
+if os.getenv("DEBUG", "false").lower() == "true":
     log = initialize_logger(logging.DEBUG)
 else:
     log = initialize_logger(logging.INFO)
@@ -379,8 +379,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     retain = False
-    if os.environ.get("MQTT_RETAIN") is not None:
-        retain = bool(os.environ.get("MQTT_RETAIN"))
+    if os.environ.get("MQTT_RETAIN", "false").lower() == "true":
+        retain = True
     log.debug(
         "Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain)
     )
