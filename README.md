@@ -26,7 +26,8 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
+* [`latest`, `1.1.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.0/Dockerfile)
+* [`1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
 * [`1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
 
 # Summary
@@ -129,6 +130,7 @@ The container grab some configuration via environment variables.
 | `REQUESTS_CA_BUNDLE`         | Path to certificates of trusted certificate authorities.                         | optional     | `/etc/ssl/certs/ca-certificates.crt` |
 | `MQTT_USERNAME`              | Username to authenticate to MQTT broker.                                         | optional     |               |
 | `MQTT_PASSWORD`              | Password to authenticate to MQTT broker.                                         | optional     |               |
+| `MQTT_PASSWORD_FILE`         | File that contains the password to authenticate to MQTT broker.                  | optional     |               |
 | `MQTT_SERVER`                | MQTT broker hostname to connect to.                                              | optional     | `test.mosquitto.org` |
 | `MQTT_PORT`                  | MQTT broker TCP port to connect to.                                              | optional     | `1883`        |
 | `MQTT_RETAIN`                | Publish MQTT message in retain mode fpr persistance.                             | optional     | `false`       |
@@ -139,14 +141,15 @@ The container grab some configuration via environment variables.
 
 ### .envrc example
 
+If you use `direnv` to load your environment automatically.
+
 ```bash
 export TZ="Europe/Berlin"
 export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 export DEBUG="true"
 export MODE="current"
-export LATITUDE="48.7801"
-export LONGITUDE="8.9321"
-export ELEVATION="409.0"
+export LATITUDE="48.72592"
+export LONGITUDE="9.11446"
 export WEATHER_MODELS="icon_d2"
 export MQTT_SERVER="test.mosquitto.org"
 export MQTT_PORT="8883"
@@ -178,12 +181,16 @@ To trigger the Python unit tests please follow following instrructions after che
 
 ```bash
 pip install -r src/requirements.txt
+pip install -r test/requirements.txt
 ```
 
 ### Execute Unit Tests
 
 ```bash
 python -m unittest
+pytest
+ruff check --select=E9,F63,F7,F82 --target-version=py312 .
+ruff check --target-version=py312 .
 ```
 
 # Donate
@@ -193,7 +200,7 @@ I would appreciate a small donation to support the further development of my ope
 
 # License
 
-Copyright (c) 2025 Michael Oberdorf IT-Consulting
+Copyright (c) 2025-2026 Michael Oberdorf IT-Consulting
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
