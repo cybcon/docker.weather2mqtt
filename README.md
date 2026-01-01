@@ -189,7 +189,7 @@ pip install -r test/requirements.txt
 ```bash
 python -m unittest
 pytest
-ruff check --target-version=py312 .
+ruff check --select=E9,F63,F7,F82 --target-version=py312 .
 ruff check --target-version=py312 .
 ```
 
