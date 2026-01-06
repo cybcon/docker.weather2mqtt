@@ -4,19 +4,30 @@
         "forecast_days": 3,
         "past_days": 0,
         "daily": [
+            "temperature_2m_mean",
             "temperature_2m_min",
             "temperature_2m_max",
             "rain_sum",
             "showers_sum",
             "snowfall_sum",
             "weather_code",
+            "wind_speed_10m_mean",
+            "wind_speed_10m_min",
             "wind_speed_10m_max",
             "wind_direction_10m_dominant",
+            "wind_gusts_10m_mean",
+            "wind_gusts_10m_min",
             "wind_gusts_10m_max",
             "sunrise",
             "sunset",
             "daylight_duration",
-            "sunshine_duration"
+            "sunshine_duration",
+            "surface_pressure_mean",
+            "surface_pressure_min",
+            "surface_pressure_max",
+            "relative_humidity_2m_mean",
+            "relative_humidity_2m_min",
+            "relative_humidity_2m_max"
         ]
     }
 }

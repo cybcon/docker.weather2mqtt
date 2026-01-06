@@ -26,7 +26,8 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.1.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.1/Dockerfile)
+* [`latest`, `1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
+* [`1.1.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.1/Dockerfile)
 * [`1.1.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.0/Dockerfile)
 * [`1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
 * [`1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
@@ -56,22 +57,22 @@ The results will be parsed, formatted in JSON and published via MQTT.
     "utc_offset_seconds": 3600
   },
   "current": {
-    "time": "2025-12-31T13:45:00+01:00",
-    "temperature_2m": 0.10000000149011612,
-    "relative_humidity_2m": 66,
+    "time": "2026-01-06T09:45:00+01:00",
+    "temperature_2m": -6.849999904632568,
+    "relative_humidity_2m": 89,
     "is_day": 1,
     "rain": 0,
     "showers": 0,
     "snowfall": 0,
-    "weather_code": 1,
-    "cloud_cover": 6,
-    "surface_pressure": 974.9057006835938,
-    "wind_speed_10m": 3.3190360069274902,
-    "wind_direction_10m": 257.47119140625,
-    "wind_gusts_10m": 8.640000343322754,
-    "weather_code_text": "Mainly clear"
+    "weather_code": 71,
+    "cloud_cover": 100,
+    "surface_pressure": 967.1641845703125,
+    "wind_speed_10m": 2.0364675521850586,
+    "wind_direction_10m": 224.99989318847656,
+    "wind_gusts_10m": 4.320000171661377,
+    "weather_code_text": "Snow fall: Slight intensity"
   },
-  "message_timestamp": "2025-12-31T13:55:18.454689+01:00"
+  "message_timestamp": "2026-01-06T09:59:13.119176+01:00"
 }
 ```
 
@@ -90,23 +91,34 @@ The results will be parsed, formatted in JSON and published via MQTT.
     "utc_offset_seconds": 3600
   },
   "tomorrow": {
-    "date": "2026-01-01",
-    "temperature_2m_min": -9.211000442504883,
-    "temperature_2m_max": 2.439000129699707,
+    "date": "2026-01-07",
+    "temperature_2m_mean": -5.241146087646484,
+    "temperature_2m_min": -8.211000442504883,
+    "temperature_2m_max": -3.510999917984009,
     "rain_sum": 0,
     "showers_sum": 0,
     "snowfall_sum": 0,
-    "weather_code": 71,
-    "wind_speed_10m_max": 17.771753311157227,
-    "wind_direction_10m_dominant": 234.57273864746094,
-    "wind_gusts_10m_max": 32.39999771118164,
+    "weather_code": 3,
+    "wind_speed_10m_mean": 6.99040412902832,
+    "wind_speed_10m_min": 1.9386591911315918,
+    "wind_speed_10m_max": 13.10419750213623,
+    "wind_direction_10m_dominant": 194.28439331054688,
+    "wind_gusts_10m_mean": 13.739999771118164,
+    "wind_gusts_10m_min": 5.039999961853027,
+    "wind_gusts_10m_max": 25.559999465942383,
     "sunrise": 0,
     "sunset": 0,
-    "daylight_duration": 30052.92578125,
-    "sunshine_duration": 23301.818359375,
-    "weather_code_text": "Snow fall: Slight intensity"
+    "daylight_duration": 30511.171875,
+    "sunshine_duration": 23594.3828125,
+    "surface_pressure_mean": 964.9620971679688,
+    "surface_pressure_min": 961.7695922851562,
+    "surface_pressure_max": 968.2794189453125,
+    "relative_humidity_2m_mean": 80.78125,
+    "relative_humidity_2m_min": 69,
+    "relative_humidity_2m_max": 89,
+    "weather_code_text": "Cloudy"
   },
-  "message_timestamp": "2025-12-31T14:37:19.159381+01:00"
+  "message_timestamp": "2026-01-06T09:57:42.813048+01:00"
 }
 ```
 
