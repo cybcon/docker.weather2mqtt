@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf
 # Date: 2025-04-11
 # Last modified by: Michael Oberdorf
-# Last modified at: 2026-01-01
+# Last modified at: 2026-01-06
 ###############################################################################
 """
 
@@ -29,7 +29,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import translate_weather_code
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
