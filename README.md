@@ -26,7 +26,7 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.3.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.2/Dockerfile)
+* [`latest`, `1.3.3`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.3/Dockerfile)
 * [`1.3.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.1/Dockerfile)
 * [`1.3.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.0/Dockerfile)
 * [`1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
