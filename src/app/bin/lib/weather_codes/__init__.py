@@ -1,63 +1,60 @@
 """
 ###############################################################################
-# Library to tranlate weather codes to human readable description text\n
-# seeAlso: https://github.com/open-meteo/open-meteo/issues/287\n
-#------------------------------------------------------------------------------\n
-# Author: Michael Oberdorf\n
-# Date: 2025-04-11\n
-# Last modified by: Michael Oberdorf\n
-# Last modified at: 2025-07-01\n
+# Library to translate weather codes to human readable description text
+# seeAlso: https://github.com/open-meteo/open-meteo/issues/287
+#------------------------------------------------------------------------------
+# Author: Michael Oberdorf
+# Date: 2025-04-11
+# Last modified by: Michael Oberdorf
+# Last modified at: 2026-01-11
 ###############################################################################\n
 """
 
 __author__ = "Michael Oberdorf <info@oberdorf-itc.de>"
 __status__ = "production"
-__date__ = "2025-07-01"
-__version_info__ = ("0", "1", "1")
+__date__ = "2026-01-11"
+__version_info__ = ("1", "0", "0")
 __version__ = ".".join(__version_info__)
 
-__all__ = ["translate_weather_code"]
+__all__ = ["WeatherCodes"]
 
-_WEATHER_CODES = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Cloudy",
-    45: "Fog",
-    48: "Freezing Fog and depositing rime fog",
-    51: "Drizzle: Light intensity",
-    53: "Drizzle: Moderate intensity",
-    55: "Drizzle: Dense intensity",
-    56: "Freezing Drizzle: Light intensity",
-    57: "Freezing Drizzle: Dense intensity",
-    61: "Rain: Slight intensity",
-    63: "Rain: Moderate intensity",
-    65: "Rain: Heavy intensity",
-    66: "Freezing Rain: Light intensity",
-    67: "Freezing Rain: Heavy intensity",
-    71: "Snow fall: Slight intensity",
-    73: "Snow fall: Moderate intensity",
-    75: "Snow fall: Heavy intensity",
-    77: "Snow Grains",
-    80: "Rain showers: Slight intensity",
-    81: "Rain showers: Moderate intensity",
-    82: "Rain showers: Heavy intensity",
-    85: "Snow showers: Slight intensity",
-    86: "Snow showers: Heavy intensity",
-    95: "Thunderstorm: Slight or moderate",
-    96: "Thunderstorm with slight hail",
-    99: "Thunderstorm with hail",
-    100: "is not used",
-    101: "Tornado",
-    102: "Tropical storm",
-    103: "Hurricane",
-}
+import json
+import logging
+import os
 
 
-def translate_weather_code(code: int) -> str:
+class WeatherCodes:
     """
-    Translate weather code to human readable description\n
-    :param code: Weather code\n
-    :return: Human readable description\n
+    Class to translate weather codes to human readable description
     """
-    return _WEATHER_CODES.get(code, "Unknown weather code")
+
+    __translations_path = os.path.join(__path__[0], "translations")
+
+    def __init__(self, language: str = "en"):
+        self.logger = logging.getLogger(__name__)
+
+        # identify the weather code translation file
+        weather_code_translation_file = os.path.join(self.__translations_path, f"{language}.json")
+        if not os.path.isfile(weather_code_translation_file):
+            self.logger.warning(
+                f"Weather code translation file for language '{language}' not found. Falling back to default language 'en'."
+            )
+            weather_code_translation_file = os.path.join(self.__translations_path, "en.json")
+
+        # load the weather code translations
+        with open(weather_code_translation_file, encoding="utf-8") as f:
+            self.weather_codes = json.load(f)
+
+    def translate(self, code: int) -> str:
+        """
+        Translate weather code to human readable description
+
+        :param code: Weather code
+        :return: Human readable description
+        """
+        # transform the code to int and str to fit to the json keys
+        code = str(int(code))
+        self.logger.debug(f"Translating weather code {code}")
+        translation = self.weather_codes.get(code, "Unknown weather code")
+        self.logger.debug(f"Weather code {code} translated to '{translation}'")
+        return translation
