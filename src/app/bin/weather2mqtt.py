@@ -29,7 +29,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     # Add the local time as message_timestamp to payload
     weather_result["message_timestamp"] = __local_tz__.localize(datetime.datetime.now()).isoformat()
 
-    log.debug("Payload: {}".format(json.dumps(weather_result)))
+    log.debug("Payload: {}".format(json.dumps(weather_result, ensure_ascii=False)))
 
     # initialize MQTT client and connect to broker
     client = initialize_mqtt_client()
@@ -388,7 +388,9 @@ if __name__ == "__main__":
     log.debug(
         "Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain)
     )
-    client.publish(topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(weather_result), qos=0, retain=retain)
+    client.publish(
+        topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(weather_result, ensure_ascii=False), qos=0, retain=retain
+    )
 
     client.disconnect()
     log.debug("Disconnected from MQTT server")
