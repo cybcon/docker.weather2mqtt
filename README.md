@@ -26,7 +26,8 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
+* [`latest`, `1.3.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.0/Dockerfile)
+* [`1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
 * [`1.1.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.1/Dockerfile)
 * [`1.1.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.0/Dockerfile)
 * [`1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
@@ -135,6 +136,7 @@ The container grab some configuration via environment variables.
 | `LONGITUDE`                  | The geo coordinate longitude from where we want to have the weather.             | optional     | `9.11446`     |
 | `ELEVATION`                  | The ground elevation from where we want to have the weather.                     | optional     |               |
 | `WEATHER_MODELS`             | The weather model to use.                                                        | optional     |               |
+| `WEATHE_CODE_LANGUAGE`       | Translation of the numeric weather code into the defined language ('en' or 'de') | optional     | `en`          |
 | `TZ`                         | The time zone to use to provide timestamps.                                      | optional     | `UTC`         |
 | `MQTT_CLIENT_ID`             | A MQTT client identifier.                                                        | optional     |               |
 | `MQTT_PROTOCOL_VERSION`      | The MQTT protocol version to use. Currently supported `3` (means 3.1.1) and `5`. | optional     | `3`           |
@@ -173,6 +175,7 @@ export MQTT_PROTOCOL_VERSION="5"
 export MQTT_TOPIC="github.com/cybcon/docker.weather2mqtt.git/weather"
 export CACHE_DIR="../cache"
 export CACHE_EXPIRY_AFTER_SEC="600"
+export WEATHE_CODE_LANGUAGE="de"
 ```
 
 ### Configuration files

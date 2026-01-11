@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf
 # Date: 2025-04-11
 # Last modified by: Michael Oberdorf
-# Last modified at: 2026-01-06
+# Last modified at: 2026-01-11
 ###############################################################################
 """
 
@@ -26,10 +26,10 @@ import openmeteo_requests
 import paho.mqtt.client as mqtt
 import pytz
 import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
-from lib.weather_codes import translate_weather_code
+from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -273,7 +273,10 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
 
     # Translate weather code
     if "weather_code" in parsed_data.keys():
-        parsed_data["weather_code_text"] = translate_weather_code(parsed_data["weather_code"])
+        weather_code_language = os.environ.get("WEATHER_CODE_LANGUAGE", "en")[0:2].lower()
+        parsed_data["weather_code_text"] = WeatherCodes(language=weather_code_language).translate(
+            code=parsed_data["weather_code"]
+        )
         log.debug(f"Translated weather code: {parsed_data['weather_code_text']}")
 
     log.debug(f"Parsed current weather: {parsed_data}")
@@ -317,9 +320,10 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
 
     # Translate weather code
     if "weather_code" in parsed_data.keys():
+        weather_code_language = os.environ.get("WEATHER_CODE_LANGUAGE", "en")[0:2].lower()
         parsed_data["weather_code_text"] = dict()
         for k, v in parsed_data["weather_code"].items():
-            parsed_data["weather_code_text"][k] = translate_weather_code(v)
+            parsed_data["weather_code_text"][k] = WeatherCodes(language=weather_code_language).translate(code=v)
 
     log.debug(f"Parsed current weather: {parsed_data}")
     return parsed_data
