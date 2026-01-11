@@ -13,13 +13,14 @@
 __author__ = "Michael Oberdorf <info@oberdorf-itc.de>"
 __status__ = "production"
 __date__ = "2026-01-11"
-__version_info__ = ("1", "0", "0")
+__version_info__ = ("1", "0", "1")
 __version__ = ".".join(__version_info__)
 
 __all__ = ["WeatherCodes"]
 
 import json
 import logging
+import math
 import os
 
 
@@ -53,7 +54,15 @@ class WeatherCodes:
         :return: Human readable description
         """
         # transform the code to int and str to fit to the json keys
-        code = str(int(code))
+
+        # Avoid "cannot convert float NaN to integer"
+        if math.isnan(code):
+            self.logger.debug(f"Weather code {code} is NaN, returning 'Unknown weather code'")
+            return "Unknown weather code"
+        if isinstance(code, float):
+            self.logger.debug(f"Weather code {code} is float, converting to int")
+            code = int(code)
+        code = str(code)
         self.logger.debug(f"Translating weather code {code}")
         translation = self.weather_codes.get(code, "Unknown weather code")
         self.logger.debug(f"Weather code {code} translated to '{translation}'")
