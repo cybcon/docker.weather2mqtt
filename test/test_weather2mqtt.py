@@ -1,18 +1,18 @@
 """
-***************************************************************************\n
-test_weather2mqtt.py is a python unit test for the python script\n
-   weather2mqtt.py\n
-Author: Michael Oberdorf\n
-Date:   2025-04-13\n
-Last modified by: Michael Oberdorf\n
-Last modified at: 2025-12-31\n
-***************************************************************************\n
+***************************************************************************
+test_weather2mqtt.py is a python unit test for the python script
+   weather2mqtt.py
+Author: Michael Oberdorf
+Date:   2025-04-13
+Last modified by: Michael Oberdorf
+Last modified at: 2026-01-11
+***************************************************************************
 """
 
 __author__ = "Michael Oberdorf <info@oberdorf-itc.de>"
 __status__ = "production"
-__date__ = "2025-12-31"
-__version_info__ = ("1", "0", "0")
+__date__ = "2026-01-11"
+__version_info__ = ("1", "0", "1")
 __version__ = ".".join(__version_info__)
 
 __all__ = ["TestWeather2Mqtt"]
