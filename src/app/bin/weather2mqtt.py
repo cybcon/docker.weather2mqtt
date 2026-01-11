@@ -18,6 +18,7 @@
 import datetime
 import json
 import logging
+import math
 import os
 import ssl
 import sys
@@ -29,7 +30,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -266,13 +267,15 @@ def parse_current_weather(data: any, fields: list = []) -> dict:
     parsed_data = dict()
 
     parsed_data["time"] = datetime.datetime.fromtimestamp(data.Time(), tz=__local_tz__).isoformat()
+    log.debug(f"Current weather time: {parsed_data['time']}")
 
     for i in range(0, len(fields)):
         parsed_data[fields[i]] = data.Variables(i).Value()
         log.debug(f"{fields[i]}: {parsed_data[fields[i]]}")
 
     # Translate weather code
-    if "weather_code" in parsed_data.keys():
+    if "weather_code" in parsed_data.keys() and not math.isnan(parsed_data["weather_code"]):
+        parsed_data["weather_code"] = int(parsed_data["weather_code"])  # be sure it's an int
         weather_code_language = os.environ.get("WEATHER_CODE_LANGUAGE", "en")[0:2].lower()
         parsed_data["weather_code_text"] = WeatherCodes(language=weather_code_language).translate(
             code=parsed_data["weather_code"]
@@ -302,28 +305,34 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
     forecast_ends_at = datetime.datetime.fromtimestamp(data.TimeEnd(), tz=__local_tz__)
     delta = forecast_ends_at - forecast_starts_at
     interval = datetime.timedelta(seconds=data.Interval())
+    log.debug(
+        f"Range from {forecast_starts_at.strftime('%Y-%m-%d')} to {forecast_ends_at.strftime('%Y-%m-%d')} with interval {interval.days} days"
+    )
 
-    # print("Range from", daily_forecast_starts_at.strftime('%Y-%m-%d'), "to", daily_forecast_ends_at.strftime('%Y-%m-%d'), "with interval", interval.days, "days")
     interval_range = list()
     for i in range(delta.days):
         forecast_interval = (forecast_starts_at + i * interval).strftime("%Y-%m-%d")
         interval_range.append(forecast_interval)
+    log.debug(f"Interval range: {interval_range}")
 
     variables_with_time = [data.Variables(i) for i in range(0, data.VariablesLength())]
 
     for i in range(0, len(fields)):
-        # Not sure do we require to varify the field. Does field order matches?
-        # And what about sunshine?
         field = parsed_data[fields[i]] = dict()
         for j in range(len(interval_range)):
             field[interval_range[j]] = variables_with_time[i].Values(j)
+            log.debug(f"{fields[i]}[{interval_range[j]}]: {field[interval_range[j]]}")
 
     # Translate weather code
     if "weather_code" in parsed_data.keys():
         weather_code_language = os.environ.get("WEATHER_CODE_LANGUAGE", "en")[0:2].lower()
         parsed_data["weather_code_text"] = dict()
         for k, v in parsed_data["weather_code"].items():
-            parsed_data["weather_code_text"][k] = WeatherCodes(language=weather_code_language).translate(code=v)
+            if math.isnan(v):
+                parsed_data["weather_code_text"][k] = "Unknown weather code"
+                continue
+            parsed_data["weather_code"][k] = int(v)  # be sure it's an int
+            parsed_data["weather_code_text"][k] = WeatherCodes(language=weather_code_language).translate(code=int(v))
 
     log.debug(f"Parsed current weather: {parsed_data}")
     return parsed_data
