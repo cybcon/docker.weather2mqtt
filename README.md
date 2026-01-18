@@ -26,7 +26,8 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.3.4`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.4/Dockerfile)
+* [`latest`, `1.4.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.4.0/Dockerfile)
+* [`1.3.4`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.4/Dockerfile)
 * [`1.3.3`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.3/Dockerfile)
 * [`1.3.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.1/Dockerfile)
 * [`1.3.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.0/Dockerfile)
@@ -151,6 +152,7 @@ The container grab some configuration via environment variables.
 | `MQTT_PASSWORD_FILE`         | File that contains the password to authenticate to MQTT broker.                  | optional     |               |
 | `MQTT_SERVER`                | MQTT broker hostname to connect to.                                              | optional     | `test.mosquitto.org` |
 | `MQTT_PORT`                  | MQTT broker TCP port to connect to.                                              | optional     | `1883`        |
+| `MQTT_QOS`                   | MQTT quality of service for published messages.                                  | optional     | `0`           |
 | `MQTT_RETAIN`                | Publish MQTT message in retain mode fpr persistance.                             | optional     | `false`       |
 | `MQTT_TOPIC`                 | The MQTT topic to publish the weather data.                                      | optional     | `com/github/cybcon/docker.weather2mqtt.git/weather` |
 | `CACHE_DIR`                  | Directory used for API request caching.                                          | optional     | `/app/cache`  |
