@@ -1,7 +1,7 @@
 FROM alpine:3.23.2
 
 LABEL maintainer="Michael Oberdorf <info@oberdorf-itc.de>"
-LABEL site.local.program.version="1.3.4"
+LABEL site.local.program.version="1.4.0"
 
 ENV TZ="UTC" \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
@@ -14,6 +14,7 @@ ENV TZ="UTC" \
     MQTT_TLS="false" \
     MQTT_TLS_INSECURE="false" \
     MQTT_PROTOCOL_VERSION="5" \
+    MQTT_QOS="0" \
     MQTT_TOPIC="com/github/cybcon/docker.weather2mqtt.git/weather" \
     MQTT_RETAIN="false" \
     CACHE_DIR="/app/cache" \
