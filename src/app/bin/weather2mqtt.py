@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf
 # Date: 2025-04-11
 # Last modified by: Michael Oberdorf
-# Last modified at: 2026-01-11
+# Last modified at: 2026-01-18
 ###############################################################################
 """
 
@@ -30,7 +30,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.3.4"
+__version__ = "1.4.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -134,7 +134,7 @@ def load_config_file() -> dict:
     return config
 
 
-def initialize_mqtt_client() -> mqtt.Client:
+def __initialize_mqtt_client() -> mqtt.Client:
     """
     Initialize the MQTT client with the given configuration from environment.
 
@@ -174,7 +174,7 @@ def initialize_mqtt_client() -> mqtt.Client:
             client.tls_set(
                 ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"),
                 cert_reqs=ssl.CERT_NONE,
-                tls_version=ssl.PROTOCOL_TLS,
+                tls_version=ssl.PROTOCOL_TLSv1_2,
                 ciphers=None,
             )
             client.tls_insecure_set(True)
@@ -183,7 +183,7 @@ def initialize_mqtt_client() -> mqtt.Client:
             client.tls_set(
                 ca_certs=os.environ.get("REQUESTS_CA_BUNDLE"),
                 cert_reqs=ssl.CERT_REQUIRED,
-                tls_version=ssl.PROTOCOL_TLS,
+                tls_version=ssl.PROTOCOL_TLSv1_2,
                 ciphers=None,
             )
             client.tls_insecure_set(False)
@@ -338,6 +338,58 @@ def parse_daily_weather(data: any, fields: list = []) -> dict:
     return parsed_data
 
 
+def publish_weather_data(topic: str, payload: dict) -> None:
+    """
+    Publish the weather data to the MQTT broker.
+
+    :param topic str: The MQTT topic to publish the weather data to.
+    :param payload dict: The weather data to publish.
+    :raise ssl.SSLCertVerificationError: If there is an SSL certificate verification error.
+    :raise Exception: If the weather data cannot be published.
+    """
+    log.debug(f"Publish weather data to MQTT topic {topic} with payload: {json.dumps(payload)}")
+
+    # Initialize MQTT client
+    client = __initialize_mqtt_client()
+    log.debug("MQTT client initialized")
+
+    log.debug("Connecting to MQTT server {}:{}".format(os.environ.get("MQTT_SERVER"), os.environ.get("MQTT_PORT")))
+    try:
+        client.connect(os.environ.get("MQTT_SERVER"), int(os.environ.get("MQTT_PORT")), 60)
+    except ssl.SSLCertVerificationError as e:
+        log.error("SSL certificate verification error: {}".format(e))
+        sys.exit(1)
+    log.debug("Connected to MQTT server")
+
+    mqtt_retain = False
+    if os.environ.get("MQTT_RETAIN", "false").lower() == "true":
+        mqtt_retain = True
+    mqtt_qos = int(os.environ.get("MQTT_QOS", "0"))
+    if mqtt_qos not in [0, 1, 2]:
+        log.warning("Invalid MQTT QoS level: {}. Using QoS 0.".format(mqtt_qos))
+        mqtt_qos = 0
+    log.debug(
+        "Publishing weather data to MQTT topic: {}, using retain: {}, qos: {}".format(
+            os.environ.get("MQTT_TOPIC"), mqtt_retain, mqtt_qos
+        )
+    )
+
+    result, mid = client.publish(
+        topic=topic,
+        payload=json.dumps(payload, ensure_ascii=False),
+        qos=mqtt_qos,
+        retain=mqtt_retain,
+    )
+
+    if result != mqtt.MQTT_ERR_SUCCESS:
+        raise Exception(f"Failed to publish weather data to MQTT topic {topic}. Error code: {result}")
+
+    log.debug(f"Published weather data to MQTT topic {topic} with message ID {mid}")
+
+    client.disconnect()
+    log.debug("Disconnected from MQTT server")
+
+
 """
 ###############################################################################
 # M A I N
@@ -381,28 +433,11 @@ if __name__ == "__main__":
 
     log.debug("Payload: {}".format(json.dumps(weather_result, ensure_ascii=False)))
 
-    # initialize MQTT client and connect to broker
-    client = initialize_mqtt_client()
-    log.debug("MQTT client initialized")
-    log.debug("Connecting to MQTT server {}:{}".format(os.environ.get("MQTT_SERVER"), os.environ.get("MQTT_PORT")))
-    try:
-        client.connect(os.environ.get("MQTT_SERVER"), int(os.environ.get("MQTT_PORT")), 60)
-    except ssl.SSLCertVerificationError as e:
-        log.error("SSL certificate verification error: {}".format(e))
-        sys.exit(1)
-
-    retain = False
-    if os.environ.get("MQTT_RETAIN", "false").lower() == "true":
-        retain = True
-    log.debug(
-        "Publishing weather data to MQTT topic: {}, using retain: {}".format(os.environ.get("MQTT_TOPIC"), retain)
+    # Publish weather data
+    publish_weather_data(
+        topic=os.environ.get("MQTT_TOPIC"),
+        payload=weather_result,
     )
-    client.publish(
-        topic=os.environ.get("MQTT_TOPIC"), payload=json.dumps(weather_result, ensure_ascii=False), qos=0, retain=retain
-    )
-
-    client.disconnect()
-    log.debug("Disconnected from MQTT server")
 
     log.info(f"Stop weather2mqtt version {__version__}")
     sys.exit(0)
