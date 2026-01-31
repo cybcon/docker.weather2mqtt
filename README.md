@@ -26,16 +26,12 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 
 # Supported tags and respective `Dockerfile` links
 
-* [`latest`, `1.4.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.4.0/Dockerfile)
+
+* [`latest`, `1.5.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.5.0/Dockerfile)
+* [`1.4.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.4.0/Dockerfile)
 * [`1.3.4`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.4/Dockerfile)
-* [`1.3.3`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.3/Dockerfile)
-* [`1.3.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.1/Dockerfile)
-* [`1.3.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.0/Dockerfile)
 * [`1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
 * [`1.1.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.1/Dockerfile)
-* [`1.1.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.0/Dockerfile)
-* [`1.0.2`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.2/Dockerfile)
-* [`1.0.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.0.0/Dockerfile)
 
 # Summary
 The application will make an [Open Meteo](https://open-meteo.com/) free weather API call to get weather information for the configured geo coordinates.
@@ -139,7 +135,7 @@ The container grab some configuration via environment variables.
 | `LATITUDE`                   | The geo coordinate latitude from where we want to have the weather.              | optional     | `48.72592`    |
 | `LONGITUDE`                  | The geo coordinate longitude from where we want to have the weather.             | optional     | `9.11446`     |
 | `ELEVATION`                  | The ground elevation from where we want to have the weather.                     | optional     |               |
-| `WEATHER_MODELS`             | The weather model to use.                                                        | optional     |               |
+| `WEATHER_MODELS`             | The weather model(s) to use as comma separated list (see below).                 | optional     |               |
 | `WEATHE_CODE_LANGUAGE`       | Translation of the numeric weather code into the defined language ('en' or 'de') | optional     | `en`          |
 | `TZ`                         | The time zone to use to provide timestamps.                                      | optional     | `UTC`         |
 | `MQTT_CLIENT_ID`             | A MQTT client identifier.                                                        | optional     |               |
@@ -158,6 +154,79 @@ The container grab some configuration via environment variables.
 | `CACHE_DIR`                  | Directory used for API request caching.                                          | optional     | `/app/cache`  |
 | `CACHE_EXPIRY_AFTER_SEC`     | Cache expiration time in seconds.                                                | optional     | `600`         |
 | `DEBUG`                      | Enable debug output log.                                                         | optional     | `false`       |
+
+## Weather models
+
+You can manually select one or more weather models. Per default, the best suitable weather models will be combined by [Open Meteo](https://open-meteo.com/).
+
+To select one or more weather models, you need to define them via the model ID in the environment variable `WEATHER_MODELS`.
+
+[Open Meteo](https://open-meteo.com/) supports, beside `best_match`, following 45 weather models:
+
+| Model name                              | Model ID                          |
+|-----------------------------------------|-----------------------------------|
+| ECMWF IFS HRES 9km                      | `ecmwf_ifs`                       |
+| ECMWF IFS 0.25°                         | `ecmwf_ifs025`                    |
+| ECMWF AIFS 0.25° Single                 | `ecmwf_aifs025_single`            |
+| CMA GRAPES Global                       | `cma_grapes_global`               |
+| BOM ACCESS Global                       | `bom_access_global`               |
+| DWD ICON Seamless                       | `icon_seamless`                   |
+| DWD ICON Global                         | `icon_global`                     |
+| DWD ICON EU                             | `icon_eu`                         |
+| DWD ICON D2                             | `icon_d2`                         |
+| MET Norway Nordic Seamless (with ECMWF) | `metno_seamless`                  |
+| MET Norway Nordic                       | `metno_nordic`                    |
+| NCEP GFS Seamless                       | `gfs_seamless`                    |
+| NCEP GFS Global 0.11°/0.25°             | `gfs_global`                      |
+| NCEP HRRR U.S. Conus                    | `gfs_hrrr`                        |
+| NCEP NBM U.S. Conus                     | `ncep_nbm_conus`                  |
+| NCEP NAM U.S. Conus                     | `ncep_nam_conus`                  |
+| GFS GraphCast                           | `gfs_graphcast025`                |
+| GEM Seamless                            | `gem_seamless`                    |
+| GEM Global                              | `gem_global`                      |
+| GEM Regional                            | `gem_regional`                    |
+| GEM HRDPS Continental                   | `gem_hrdps_continental`           |
+| GEM HRDPS West                          | `gem_hrdps_west`                  |
+| KNMI Seamless (with ECMWF)              | `knmi_seamless`                   |
+| KNMI Harmonie Arome Europe              | `knmi_harmonie_arome_europe`      |
+| KNMI Harmonie Arome Netherlands         | `knmi_harmonie_arome_netherlands` |
+| DMI Seamless (with ECMWF)               | `dmi_seamless`                    |
+| DMI Harmonie Arome Europe               | `dmi_harmonie_arome_europe`       |
+| JMA Seamless                            | `jma_seamless`                    |
+| JMA MSM                                 | `jma_msm`                         |
+| JMA GSM                                 | `jma_gsm`                         |
+| Météo-France Seamless                   | `meteofrance_seamless`            |
+| Météo-France ARPEGE World               | `meteofrance_arpege_world`        |
+| Météo-France ARPEGE Europe              | `meteofrance_arpege_europe`       |
+| Météo-France AROME France               | `meteofrance_arome_france`        |
+| Météo-France AROME France HD            | `meteofrance_arome_france_hd`     |
+| UK Met Office Seamless                  | `ukmo_seamless`                   |
+| UK Met Office Global 10km               | `ukmo_global_deterministic_10km`  |
+| UK Met Office UK 2km                    | `ukmo_uk_deterministic_2km`       |
+| KMA Seamless                            | `kma_seamless`                    |
+| KMA LDPS                                | `kma_ldps`                        |
+| KMA GDPS                                | `kma_gdps`                        |
+| ItaliaMeteo ARPAE ICON 2I               | `italia_meteo_arpae_icon_2i`      |
+| MeteoSwiss ICON Seamless                | `meteoswiss_icon_seamless`        |
+| MeteoSwiss ICON CH1                     | `meteoswiss_icon_ch1`             |
+| MeteoSwiss ICON CH2                     | `meteoswiss_icon_ch2`             |
+
+
+### Examples
+
+Examples on how to set one or more weather models.
+
+**Single weather model:**
+
+```
+export WEATHER_MODELS="icon_d2"
+```
+
+**Multiple weather models:**
+
+```
+export WEATHER_MODELS=icon_d2,icon_eu
+```
 
 ### .envrc example
 
