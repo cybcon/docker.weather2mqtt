@@ -11,7 +11,7 @@
 # Author: Michael Oberdorf
 # Date: 2025-04-11
 # Last modified by: Michael Oberdorf
-# Last modified at: 2026-01-18
+# Last modified at: 2026-01-31
 ###############################################################################
 """
 
@@ -30,7 +30,7 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -127,7 +127,12 @@ def load_config_file() -> dict:
     if os.environ.get("ELEVATION") is not None:
         config["data"]["elevation"] = float(os.environ.get("ELEVATION"))
     if os.environ.get("WEATHER_MODELS") is not None:
-        config["data"]["models"] = os.environ.get("WEATHER_MODELS")
+        config["data"]["models"] = os.environ.get("WEATHER_MODELS").replace(" ", "")
+        if "[" in config["data"]["models"] and "]" in config["data"]["models"]:
+            config["data"]["models"] = json.loads(config["data"]["models"])
+        else:
+            if "," in config["data"]["models"]:
+                config["data"]["models"] = config["data"]["models"].split(",")
     if os.environ.get("TZ") is not None:
         config["data"]["timezone"] = os.environ.get("TZ")
 
