@@ -18,32 +18,33 @@ Container image: [DockerHub](https://hub.docker.com/r/oitc/weather2mqtt)
 [![][github-forks-shield]][github-forks-link]
 [![][github-issues-shield]][github-issues-link]
 [![][github-license-shield]][github-license-link]
-
 [![][docker-release-shield]][docker-release-link]
 [![][docker-pulls-shield]][docker-pulls-link]
 [![][docker-stars-shield]][docker-stars-link]
 [![][docker-size-shield]][docker-size-link]
 
-# Supported tags and respective `Dockerfile` links
+## Supported tags and respective `Dockerfile` links
 
-
-* [`latest`, `1.5.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.5.0/Dockerfile)
+* [`latest`, `1.6.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.6.0/Dockerfile)
+* [`1.5.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.5.0/Dockerfile)
 * [`1.4.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.4.0/Dockerfile)
 * [`1.3.4`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.3.4/Dockerfile)
 * [`1.2.0`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.2.0/Dockerfile)
 * [`1.1.1`](https://github.com/cybcon/docker.weather2mqtt/blob/v1.1.1/Dockerfile)
 
-# Summary
+## Summary
+
 The application will make an [Open Meteo](https://open-meteo.com/) free weather API call to get weather information for the configured geo coordinates.
 There are currently two `MODES` specified:
+
 1. `current`: will get the current weather
 2. `tomorrow`: will get the weather for tomorrow
 
 The results will be parsed, formatted in JSON and published via MQTT.
 
-## JSON output examples
+### JSON output examples
 
-### current weather
+#### current weather
 
 ```json
 {
@@ -77,7 +78,7 @@ The results will be parsed, formatted in JSON and published via MQTT.
 }
 ```
 
-## weather forecast for tomorrow
+#### weather forecast for tomorrow
 
 ```json
 {
@@ -123,9 +124,9 @@ The results will be parsed, formatted in JSON and published via MQTT.
 }
 ```
 
-# Configuration
+## Configuration
 
-## Container configuration
+### Container configuration
 
 The container grab some configuration via environment variables.
 
@@ -155,7 +156,7 @@ The container grab some configuration via environment variables.
 | `CACHE_EXPIRY_AFTER_SEC`     | Cache expiration time in seconds.                                                | optional     | `600`         |
 | `DEBUG`                      | Enable debug output log.                                                         | optional     | `false`       |
 
-## Weather models
+### Weather models
 
 You can manually select one or more weather models. Per default, the best suitable weather models will be combined by [Open Meteo](https://open-meteo.com/).
 
@@ -211,24 +212,23 @@ To select one or more weather models, you need to define them via the model ID i
 | MeteoSwiss ICON CH1                     | `meteoswiss_icon_ch1`             |
 | MeteoSwiss ICON CH2                     | `meteoswiss_icon_ch2`             |
 
-
-### Examples
+#### Examples
 
 Examples on how to set one or more weather models.
 
 **Single weather model:**
 
-```
+```bash
 export WEATHER_MODELS="icon_d2"
 ```
 
 **Multiple weather models:**
 
-```
+```nash
 export WEATHER_MODELS=icon_d2,icon_eu
 ```
 
-### .envrc example
+#### .envrc example
 
 If you use `direnv` to load your environment automatically.
 
@@ -252,7 +252,7 @@ export CACHE_EXPIRY_AFTER_SEC="600"
 export WEATHE_CODE_LANGUAGE="de"
 ```
 
-### Configuration files
+#### Configuration files
 
 The modes (`current` and `tomorrow`) are defined in configuration files. That can be found here:
 
@@ -263,18 +263,18 @@ The modes (`current` and `tomorrow`) are defined in configuration files. That ca
 
 The files specifies the API call request body for Open Mateo. A documentation of the free weather API can be found here: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs).
 
-## Python Unit Tests
+### Python Unit Tests
 
 To trigger the Python unit tests please follow following instrructions after checkout the git repository.
 
-### Requirements
+#### Requirements
 
 ```bash
 pip install -r src/requirements.txt
 pip install -r test/requirements.txt
 ```
 
-### Execute Unit Tests
+#### Execute Unit Tests
 
 ```bash
 python -m unittest
@@ -283,12 +283,13 @@ ruff check --select=E9,F63,F7,F82 --target-version=py312 .
 ruff check --target-version=py312 .
 ```
 
-# Donate
+## Donate
+
 I would appreciate a small donation to support the further development of my open source projects.
 
-<a href="https://www.paypal.com/donate/?hosted_button_id=BHGJGGUS6RH44" target="_blank"><img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" width="200px"></a>
+[![Donate with PayPal][donate-paypal-button]][donate-paypal-link]
 
-# License
+## License
 
 Copyright (c) 2025-2026 Michael Oberdorf IT-Consulting
 
@@ -319,6 +320,8 @@ SOFTWARE.
 [docker-size-shield]: https://img.shields.io/docker/image-size/oitc/weather2mqtt?color=369eff&labelColor=black&style=flat-square
 [docker-stars-link]: https://hub.docker.com/r/oitc/weather2mqtt
 [docker-stars-shield]: https://img.shields.io/docker/stars/oitc/weather2mqtt?color=45cc11&labelColor=black&style=flat-square
+[donate-paypal-button]: https://raw.githubusercontent.com/cybcon/paypal-donate-button/refs/heads/master/paypal-donate-button_200x77.png
+[donate-paypal-link]: https://www.paypal.com/donate/?hosted_button_id=BHGJGGUS6RH44
 [github-action-release-link]: https://github.com/cybcon/docker.weather2mqtt/actions/workflows/release-from-label.yaml
 [github-action-release-shield]: https://img.shields.io/github/actions/workflow/status/cybcon/docker.weather2mqtt/release-from-label.yaml?label=release&labelColor=black&logo=githubactions&logoColor=white&style=flat-square
 [github-action-test-link]: https://github.com/cybcon/docker.weather2mqtt/actions/workflows/code-validation.yaml

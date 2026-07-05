@@ -1,7 +1,7 @@
-FROM alpine:3.23.3
+FROM alpine:3.24.1
 
 LABEL maintainer="Michael Oberdorf <info@oberdorf-itc.de>"
-LABEL site.local.program.version="1.5.0"
+LABEL site.local.program.version="1.6.0"
 
 ENV TZ="UTC" \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
@@ -24,10 +24,10 @@ COPY --chown=root:root /src /
 
 RUN apk upgrade --available --no-cache --update \
     && apk add --no-cache --update \
-       python3=3.12.12-r0 \
-       py3-pip=25.1.1-r1 \
-       ca-certificates=20251003-r0 \
-       tzdata=2025c-r0 \
+       python3=3.14.5-r0 \
+       py3-pip=26.1.2-r0 \
+       ca-certificates=20260611-r0 \
+       tzdata=2026b-r0 \
     # Cleanup APK
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && pip3 install --no-cache-dir -r /requirements.txt --break-system-packages \

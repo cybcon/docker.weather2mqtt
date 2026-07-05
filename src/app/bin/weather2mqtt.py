@@ -1,18 +1,16 @@
 """
-###############################################################################
-# Tool to get weather information from the Open-Meteo API and publish it to MQTT
-# seeAlso: https://open-meteo.com/en/docs
-#------------------------------------------------------------------------------
-# This is a Hackergarden project, started during 50th Hackergarden 2025-04-01
-# at codecentric AG, Industriestraße 3, 70565 Stuttgart, Germany
-# seeAlso: https://www.hackergarten.net/
-# seeAlso: https://www.codecentric.de/standorte/stuttgart
-#------------------------------------------------------------------------------
-# Author: Michael Oberdorf
-# Date: 2025-04-11
-# Last modified by: Michael Oberdorf
-# Last modified at: 2026-01-31
-###############################################################################
+Tool to get weather information from the Open-Meteo API and publish it to MQTT
+seeAlso: https://open-meteo.com/en/docs
+------------------------------------------------------------------------------
+This is a Hackergarden project, started during 50th Hackergarden 2025-04-01
+at codecentric AG, Industriestraße 3, 70565 Stuttgart, Germany
+seeAlso: https://www.hackergarten.net/
+seeAlso: https://www.codecentric.de/standorte/stuttgart
+------------------------------------------------------------------------------
+Author: Michael Oberdorf
+Date: 2025-04-11
+Last modified by: Michael Oberdorf
+Last modified at: 2026-07-05
 """
 
 import datetime
@@ -30,7 +28,10 @@ import requests_cache  # seeAlso: https://pypi.org/project/requests-cache/
 from lib.weather_codes import WeatherCodes
 from retry_requests import retry  # seeAlso: https://pypi.org/project/retry-requests/
 
-__version__ = "1.5.0"
+__status__ = "production"
+__date__ = "2026-07-05"
+__version_info__ = ("1", "6", "0")
+__version__ = ".".join(__version_info__)
 __script_path__ = os.path.dirname(__file__)
 __config_path__ = os.path.join(os.path.dirname(__script_path__), "etc")
 __local_tz__ = pytz.timezone("UTC")
@@ -109,7 +110,7 @@ def load_config_file() -> dict:
         config_file = os.path.join(__config_path__, os.environ.get("MODE") + ".json")
         if os.path.isfile(config_file):
             log.debug("Load configuration from file: {}".format(config_file))
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 config = json.load(f)
         else:
             raise ValueError(f"Configuration file {config_file} not found.")
@@ -200,7 +201,7 @@ def __initialize_mqtt_client() -> mqtt.Client:
     if os.environ.get("MQTT_PASSWORD_FILE") is not None:
         if not os.path.isfile(os.environ.get("MQTT_PASSWORD_FILE")):
             raise ValueError("MQTT password file {} not found.".format(os.environ.get("MQTT_PASSWORD_FILE")))
-        with open(os.environ.get("MQTT_PASSWORD_FILE"), "r") as f:
+        with open(os.environ.get("MQTT_PASSWORD_FILE")) as f:
             mqtt_pass = f.read().strip()
     if os.environ.get("MQTT_USERNAME") is not None and mqtt_pass is not None:
         log.debug("Set username ({}) and password for MQTT connection".format(os.environ.get("MQTT_USERNAME")))
